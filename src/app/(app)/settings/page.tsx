@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FileDown, Settings } from "lucide-react";
+import { ExamProfile } from "@/components/settings/exam-profile";
 
 export default function SettingsPage() {
   return (
@@ -13,6 +14,8 @@ export default function SettingsPage() {
           Manage your account and export your data.
         </p>
       </div>
+
+      <ExamProfile />
 
       <div className="card-base p-5 flex items-center gap-4 hover:bg-[var(--color-surface)] transition-colors">
         <div className="w-10 h-10 rounded-lg bg-[var(--color-accent-light)] flex items-center justify-center shrink-0">

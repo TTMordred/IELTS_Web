@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Fira_Code } from "next/font/google";
 import "./globals.css";
+import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -42,7 +43,10 @@ export default function RootLayout({
       className={`${inter.variable} ${firaCode.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <ServiceWorkerRegister />
+      </body>
     </html>
   );
 }

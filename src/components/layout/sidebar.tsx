@@ -17,6 +17,8 @@ import {
   Settings,
   CalendarDays,
   Activity,
+  Users,
+  MessageSquareCode,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -110,12 +112,24 @@ const navItems = [
     icon: HelpCircle,
     enabled: true,
   },
+  {
+    label: "Study Groups",
+    href: "/groups",
+    icon: Users,
+    enabled: true,
+  },
+  {
+    label: "Peer Review",
+    href: "/peer-review",
+    icon: MessageSquareCode,
+    enabled: true,
+  },
   { type: "divider" as const },
   {
     label: "Settings",
     href: "/settings",
     icon: Settings,
-    enabled: false,
+    enabled: true,
   },
 ];
 
