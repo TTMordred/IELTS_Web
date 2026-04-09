@@ -11,7 +11,7 @@ export function AISettingsForm({
   initialSettings: Record<string, string>;
 }) {
   const [aiEnabled, setAiEnabled] = useState(initialSettings.ai_enabled === "true");
-  const [model, setModel] = useState(initialSettings.ai_model || "gemini-2.0-flash");
+  const [model, setModel] = useState(initialSettings.ai_model || "gemini-2.5-flash");
   const [dailyLimit, setDailyLimit] = useState(initialSettings.ai_daily_limit_per_user || "20");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -73,8 +73,8 @@ export function AISettingsForm({
         </div>
         <div className="grid grid-cols-2 gap-2">
           {[
-            { id: "gemini-2.0-flash", name: "Gemini Flash", desc: "Fast & cheap (~$0.075/1M tokens)", icon: "⚡" },
-            { id: "gemini-2.0-pro", name: "Gemini Pro", desc: "Higher quality (~$1.25/1M tokens)", icon: "🎯" },
+            { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash", desc: "Fast & cheap (~$0.15/1M tokens)", icon: "⚡" },
+            { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro", desc: "Higher quality (~$1.25/1M tokens)", icon: "🎯" },
           ].map((m) => (
             <button
               key={m.id}

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { evaluateSpeaking } from "@/lib/ai/gemini";
+import { getAIModel } from "@/lib/ai/check-ai-enabled";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -25,11 +26,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Entry not found" }, { status: 404 });
   }
 
-  const { data: parts } = await supabase
-    .from("speaking_parts")
-    .select("part, topic, notes")
-    .eq("entry_id", entryId)
-    .order("part", { ascending: true });
+  const [{ data: parts }, model] = await Promise.all([
+    supabase
+      .from("speaking_parts")
+      .select("part, topic, notes")
+      .eq("entry_id", entryId)
+      .order("part", { ascending: true }),
+    getAIModel(),
+  ]);
 
   const combinedNotes = [
     entry.reflection ? `Reflection: ${entry.reflection}` : "",
@@ -46,6 +50,7 @@ export async function POST(request: Request) {
       part: 1,
       topic: entry.type ?? "speaking",
       notes: combinedNotes || "No notes provided",
+      model,
     });
     return NextResponse.json(result);
   } catch (err) {

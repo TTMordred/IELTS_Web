@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { gradeWritingEssay } from "@/lib/ai/gemini";
+import { getAIModel } from "@/lib/ai/check-ai-enabled";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -14,12 +15,15 @@ export async function POST(request: Request) {
 
   const { entryId } = await request.json();
 
-  const { data: entry, error } = await supabase
-    .from("writing_entries")
-    .select("id, task_type, sub_type, question_text, essay_content")
-    .eq("id", entryId)
-    .eq("user_id", user.id)
-    .single();
+  const [{ data: entry, error }, model] = await Promise.all([
+    supabase
+      .from("writing_entries")
+      .select("id, task_type, sub_type, question_text, essay_content")
+      .eq("id", entryId)
+      .eq("user_id", user.id)
+      .single(),
+    getAIModel(),
+  ]);
 
   if (error || !entry) {
     return NextResponse.json({ error: "Entry not found" }, { status: 404 });
@@ -31,6 +35,7 @@ export async function POST(request: Request) {
       subType: entry.sub_type ?? "",
       questionText: entry.question_text ?? "",
       essayContent: entry.essay_content ?? "",
+      model,
     });
     return NextResponse.json(result);
   } catch (err) {

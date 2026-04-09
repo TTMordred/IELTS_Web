@@ -1,7 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Use Gemini Flash for cost efficiency (~$0.075/1M tokens vs $1.25 for Pro)
-const FLASH_MODEL = "gemini-2.0-flash";
+const DEFAULT_MODEL = "gemini-2.5-flash";
 const MAX_INPUT_LENGTH = 5000;
 
 function clampScore(v: unknown): number {
@@ -41,6 +40,7 @@ export async function gradeWritingEssay(input: {
   subType: string;
   questionText: string;
   essayContent: string;
+  model?: string;
 }): Promise<{
   ta: number;
   cc: number;
@@ -51,7 +51,7 @@ export async function gradeWritingEssay(input: {
   strengths: string[];
   improvements: string[];
 }> {
-  const model = getClient().getGenerativeModel({ model: FLASH_MODEL });
+  const model = getClient().getGenerativeModel({ model: input.model ?? DEFAULT_MODEL });
 
   const prompt = `You are a senior IELTS examiner. Grade this IELTS ${input.taskType === "task1" ? "Task 1" : "Task 2"} essay.
 
@@ -99,6 +99,7 @@ export async function evaluateSpeaking(input: {
   part: 1 | 2 | 3;
   topic: string;
   notes: string;
+  model?: string;
 }): Promise<{
   fluency: number;
   lexical: number;
@@ -108,7 +109,7 @@ export async function evaluateSpeaking(input: {
   feedback: string;
   tips: string[];
 }> {
-  const model = getClient().getGenerativeModel({ model: FLASH_MODEL });
+  const model = getClient().getGenerativeModel({ model: input.model ?? DEFAULT_MODEL });
 
   const prompt = `You are a senior IELTS Speaking examiner. Evaluate this Speaking Part ${input.part} response.
 
@@ -156,7 +157,7 @@ export async function analyzeErrors(input: {
   patterns: { pattern: string; frequency: number; description: string }[];
   advice: string;
 }> {
-  const model = getClient().getGenerativeModel({ model: FLASH_MODEL });
+  const model = getClient().getGenerativeModel({ model: DEFAULT_MODEL });
 
   const prompt = `Analyze these IELTS ${input.skill} mistake patterns:
 
