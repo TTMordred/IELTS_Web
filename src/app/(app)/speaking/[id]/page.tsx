@@ -12,6 +12,7 @@ import { ChevronLeft, MessageSquare } from "lucide-react";
 import { InlineEditField } from "@/components/ui/inline-edit-field";
 import { getRelatedRecords } from "@/app/(app)/record-links-actions";
 import { RelatedRecords } from "@/components/record-links/related-records";
+import { AiGradeSpeaking } from "@/components/ai/ai-grade-speaking";
 
 const MODULE_COLOR = "#1D9E75";
 
@@ -224,6 +225,9 @@ export default async function SpeakingDetailPage({
           <audio controls src={recordingSignedUrl} className="w-full" />
         </div>
       )}
+
+      {/* AI Evaluate */}
+      <AiGradeSpeaking entryId={entry.id} />
 
       {/* Related Records */}
       <div className="card-base p-5">

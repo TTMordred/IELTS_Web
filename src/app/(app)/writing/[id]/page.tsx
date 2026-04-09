@@ -9,6 +9,7 @@ import { RichTextDisplay } from "@/components/ui/rich-text-display";
 import { RichEditField } from "@/components/ui/rich-edit-field";
 import { getRelatedRecords } from "@/app/(app)/record-links-actions";
 import { RelatedRecords } from "@/components/record-links/related-records";
+import { AiGradeWriting } from "@/components/ai/ai-grade-writing";
 
 function bandToColor(band: number): string {
   if (band >= 8) return "#22c55e";
@@ -191,6 +192,9 @@ export default async function WritingDetailPage({
           minHeight="100px"
         />
       </div>
+
+      {/* AI Grade */}
+      <AiGradeWriting entryId={entry.id} />
 
       {/* Related Records */}
       <div className="card-base p-5">
