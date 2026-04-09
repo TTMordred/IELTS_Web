@@ -1,20 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default function AuthPage() {
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://langhub.mordred.site";
+
+function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [signedUp, setSignedUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
+
+  // Show error from callback redirect (e.g. expired link)
+  const callbackError = searchParams.get("error");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,16 +42,40 @@ export default function AuthPage() {
           password,
           options: {
             data: { display_name: displayName },
+            emailRedirectTo: `${SITE_URL}/auth/callback`,
           },
         });
         if (error) throw error;
-        router.push("/onboarding");
+        setSignedUp(true);
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
+  }
+
+  if (signedUp) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--color-body)] px-4">
+        <div className="card-base w-full max-w-sm p-8 text-center space-y-4">
+          <div className="w-14 h-14 rounded-full bg-[var(--color-accent-light)] flex items-center justify-center mx-auto text-2xl">
+            ✉️
+          </div>
+          <h2 className="heading-md">Check your email</h2>
+          <p className="text-sm text-[var(--color-ink-secondary)]">
+            We sent a confirmation link to <strong>{email}</strong>. Click it to activate your account.
+          </p>
+          <button
+            type="button"
+            onClick={() => { setSignedUp(false); setIsLogin(true); }}
+            className="text-sm text-[var(--color-accent)] hover:underline cursor-pointer"
+          >
+            Back to Sign In
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -58,6 +89,12 @@ export default function AuthPage() {
             {isLogin ? "Welcome back" : "Create your account"}
           </p>
         </div>
+
+        {callbackError === "confirmation_failed" && (
+          <p className="text-sm text-[var(--color-critical)] bg-red-500/10 rounded-md px-3 py-2 mb-4">
+            Confirmation link is invalid or expired. Please sign up again.
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
@@ -122,5 +159,13 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense>
+      <AuthForm />
+    </Suspense>
   );
 }
