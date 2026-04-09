@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IELTS Hub — Development Roadmap</title>
+<style>
+  /* ─── Reset & Base ─────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; font-size: 15px; }
+  body {
+    background: #0a0a0a; color: #ccc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+    line-height: 1.65; padding: 0; min-height: 100vh;
+  }
+  a { color: #4488ff; text-decoration: none; }
+  a:hover { color: #66aaff; text-decoration: underline; }
+  code, pre, .mono { font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace; }
+
+  /* ─── Layout ───────────────────────────────────────────── */
+  .page-wrapper { display: flex; min-height: 100vh; }
+
+  /* ─── Sidebar TOC ──────────────────────────────────────── */
+  .sidebar {
+    position: fixed; top: 0; left: 0; width: 280px; height: 100vh; overflow-y: auto;
+    background: #080808; border-right: 1px solid #1a1a1a; padding: 24px 16px; z-index: 100;
+  }
+  .sidebar h2 { color: #00ff88; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; margin-top: 20px; }
+  .sidebar ol { list-style: none; counter-reset: toc; }
+  .sidebar ol li { counter-increment: toc; margin-bottom: 4px; }
+  .sidebar ol li a {
+    display: block; padding: 5px 8px; border-radius: 4px; font-size: 0.78rem; color: #888; transition: all 0.2s;
+  }
+  .sidebar ol li a::before { content: counter(toc, decimal-leading-zero) " "; color: #444; margin-right: 4px; }
+  .sidebar ol li a:hover { background: #151515; color: #00ff88; text-decoration: none; }
+  .sidebar .logo { text-align: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #1a1a1a; }
+  .sidebar .logo span { font-size: 1.05rem; font-weight: 700; color: #00ff88; letter-spacing: 1px; }
+  .sidebar .logo small { display: block; font-size: 0.62rem; color: #555; margin-top: 2px; }
+  .sidebar .sub-items { margin-left: 18px; margin-top: 2px; }
+  .sidebar .sub-items a { font-size: 0.72rem; padding: 3px 8px; color: #666; }
+  .sidebar .sub-items a::before { content: none; }
+  .sidebar .sub-items a:hover { color: #88ddaa; }
+
+  /* ─── Main Content ─────────────────────────────────────── */
+  .main { margin-left: 280px; padding: 40px 48px 80px; max-width: 1100px; width: 100%; }
+
+  /* ─── Header ───────────────────────────────────────────── */
+  .page-header {
+    text-align: center; padding: 48px 0 40px; margin-bottom: 40px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .page-header h1 { font-size: 2.4rem; color: #fff; font-weight: 800; letter-spacing: -0.5px; }
+  .page-header h1 span { color: #00ff88; }
+  .page-header .subtitle { color: #666; font-size: 0.95rem; margin-top: 8px; }
+  .page-header .version { display: inline-block; background: #00ff8818; color: #00ff88; padding: 3px 12px; border-radius: 12px; font-size: 0.75rem; margin-top: 12px; font-weight: 600; }
+
+  /* ─── Section ──────────────────────────────────────────── */
+  .section { margin-bottom: 56px; }
+  .section-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+    padding-bottom: 12px; border-bottom: 1px solid #1a1a1a;
+  }
+  .section-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%; background: #00ff8820; color: #00ff88;
+    font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+  }
+  .section-header h2 { font-size: 1.45rem; color: #fff; font-weight: 700; }
+
+  /* ─── Cards ────────────────────────────────────────────── */
+  .card {
+    background: #111; border: 1px solid #1a1a1a; border-radius: 8px;
+    padding: 24px; margin-bottom: 20px; position: relative;
+  }
+  .card h3 { color: #fff; font-size: 1.05rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+  .card p { margin-bottom: 10px; font-size: 0.9rem; }
+  .card .idea-why { color: #88ddaa; font-size: 0.85rem; padding: 10px 14px; background: #00ff8808; border-left: 3px solid #00ff8840; border-radius: 0 6px 6px 0; margin-top: 10px; }
+
+  /* ─── Phase Headers ────────────────────────────────────── */
+  .phase-intro {
+    background: #0e0e0e; border: 1px solid #1a1a1a; border-radius: 8px;
+    padding: 20px 24px; margin-bottom: 24px;
+  }
+  .phase-intro p { font-size: 0.88rem; color: #999; margin: 0; }
+  .phase-intro .phase-goal { color: #fff; font-weight: 600; font-size: 0.92rem; margin-bottom: 6px; }
+
+  /* ─── Priority Badges ──────────────────────────────────── */
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.72rem;
+    font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .badge-p0 { background: #ff444420; color: #ff6666; }
+  .badge-p1 { background: #ffaa2220; color: #ffcc44; }
+  .badge-p2 { background: #4488ff20; color: #66aaff; }
+  .badge-p3 { background: #88888820; color: #aaa; }
+  .badge-analytics { background: #aa44ff20; color: #bb66ff; }
+  .badge-ux { background: #00ff8820; color: #00ff88; }
+  .badge-hub { background: #378ADD20; color: #378ADD; }
+  .badge-ai { background: #ffcc0020; color: #ffcc00; }
+  .badge-content { background: #D85A3020; color: #D85A30; }
+  .badge-social { background: #99355620; color: #993556; }
+  .badge-core { background: #1D9E7520; color: #1D9E75; }
+
+  /* ─── Impact/Effort Meter ──────────────────────────────── */
+  .meter { display: flex; gap: 16px; margin-top: 10px; font-size: 0.78rem; }
+  .meter-item { display: flex; align-items: center; gap: 6px; }
+  .meter-label { color: #666; }
+  .meter-bar { width: 60px; height: 6px; background: #1a1a1a; border-radius: 3px; overflow: hidden; }
+  .meter-fill { height: 100%; border-radius: 3px; }
+  .fill-high { background: #00ff88; }
+  .fill-med { background: #ffcc00; }
+  .fill-low { background: #4488ff; }
+
+  /* ─── Tables ───────────────────────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  table th {
+    background: #151515; color: #00ff88; text-align: left; padding: 10px 12px;
+    border-bottom: 2px solid #222; font-weight: 600; white-space: nowrap;
+  }
+  table td { padding: 8px 12px; border-bottom: 1px solid #1a1a1a; vertical-align: top; }
+  table tr:hover td { background: #0f0f0f; }
+
+  /* ─── Positioning Banner ───────────────────────────────── */
+  .positioning-banner {
+    background: linear-gradient(135deg, #00ff8810 0%, #00ff8805 100%);
+    border: 1px solid #00ff8830; border-radius: 10px; padding: 28px 32px;
+    margin-bottom: 32px; text-align: center;
+  }
+  .positioning-banner h3 { color: #00ff88; font-size: 1.2rem; margin-bottom: 8px; }
+  .positioning-banner p { color: #aaa; font-size: 0.92rem; max-width: 700px; margin: 0 auto; }
+
+  /* ─── Philosophy Cards ─────────────────────────────────── */
+  .principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; }
+  .principle {
+    background: #0e0e0e; border: 1px solid #1a1a1a; border-radius: 8px; padding: 20px;
+    text-align: center;
+  }
+  .principle .icon { font-size: 1.8rem; margin-bottom: 8px; }
+  .principle h4 { color: #fff; font-size: 0.9rem; margin-bottom: 6px; }
+  .principle p { color: #888; font-size: 0.78rem; }
+
+  /* ─── Responsive ───────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 24px 20px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<!-- ─── SIDEBAR ──────────────────────────────────────────── -->
+<nav class="sidebar">
+  <div class="logo">
+    <span>IELTS Hub</span>
+    <small>Development Roadmap</small>
+  </div>
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#philosophy">Product Philosophy</a></li>
+    <li><a href="#phase-a">Phase A — Sharpen the Blade</a>
+      <div class="sub-items">
+        <a href="#deep-analytics">Deep Analytics Dashboard</a>
+        <a href="#inline-editing">Inline Editing Everywhere</a>
+        <a href="#readiness-score">Readiness Score</a>
+        <a href="#global-search">Global Search / Cmd+K</a>
+        <a href="#confidence-trends">Confidence Trend Lines</a>
+      </div>
+    </li>
+    <li><a href="#phase-b">Phase B — Expand the Hub</a>
+      <div class="sub-items">
+        <a href="#resource-library">Resource Library</a>
+        <a href="#calendar-planner">Calendar Planner</a>
+        <a href="#exam-quarter">Exam Quarter Integration</a>
+        <a href="#type-wiki">Question Type Wiki</a>
+        <a href="#cross-module">Cross-Module Linking</a>
+        <a href="#weekly-digest">Weekly Study Digest</a>
+      </div>
+    </li>
+    <li><a href="#phase-c">Phase C — Power Tools</a>
+      <div class="sub-items">
+        <a href="#mistake-journal">Mistake Journal</a>
+        <a href="#study-timer">Study Timer / Pomodoro</a>
+        <a href="#ws-heatmaps">Writing & Speaking Heatmaps</a>
+        <a href="#batch-import">Batch Import</a>
+        <a href="#tutor-view">Tutor / Shared View</a>
+        <a href="#speaking-recorder">Speaking Recorder</a>
+        <a href="#export-pdf">Export to PDF</a>
+      </div>
+    </li>
+    <li><a href="#phase-d">Phase D — Ecosystem Play</a>
+      <div class="sub-items">
+        <a href="#goal-engine">Goal-Setting Engine</a>
+        <a href="#rich-notes">Rich-Text Notes</a>
+        <a href="#notifications">Smart Notifications</a>
+        <a href="#achievement-sharing">Achievement Sharing</a>
+        <a href="#dashboard-toggles">Dashboard Toggles</a>
+        <a href="#multi-source">Multi-Source View</a>
+        <a href="#focus-mode">Focus Mode</a>
+        <a href="#custom-widgets">Customizable Widgets</a>
+        <a href="#multi-exam">Multi-Exam Support</a>
+        <a href="#offline-first">Offline-First PWA</a>
+        <a href="#study-groups">Study Groups</a>
+        <a href="#peer-review">Peer Review Exchange</a>
+      </div>
+    </li>
+    <li><a href="#matrix">Priority Matrix</a></li>
+  </ol>
+</nav>
+
+<!-- ─── MAIN CONTENT ─────────────────────────────────────── -->
+<main class="main">
+
+  <!-- Header -->
+  <header class="page-header" id="top">
+    <h1>IELTS Hub — <span>Development Roadmap</span></h1>
+    <div class="subtitle">From Tracker to the Ultimate Language Learning Hub</div>
+    <div class="version">v3 &middot; 2026-04-05 &middot; AgentLoop 4/4 &middot; 30 Ideas</div>
+  </header>
+
+  <!-- ─── SECTION 1: PHILOSOPHY ──────────────────────────── -->
+  <section class="section" id="philosophy">
+    <div class="section-header">
+      <span class="section-num">1</span>
+      <h2>Product Philosophy</h2>
+    </div>
+
+    <div class="positioning-banner">
+      <h3>This is a Hub — Not a Classroom</h3>
+      <p>IELTS Hub is where learners <strong>track, organize, analyze, and own</strong> their study data. We don't teach — we give learners the best workspace to teach themselves. Think Notion for language learning: editable, interactable, data-driven.</p>
+    </div>
+
+    <div class="principles">
+      <div class="principle">
+        <div class="icon">&#9998;</div>
+        <h4>Editable Everything</h4>
+        <p>Every piece of data the user enters should be inline-editable. No modal hell, no page redirects. Click, type, done.</p>
+      </div>
+      <div class="principle">
+        <div class="icon">&#128202;</div>
+        <h4>Data Ownership</h4>
+        <p>Users own their data. Export, visualize, slice it any way. The hub exists to surface insights they can't get elsewhere.</p>
+      </div>
+      <div class="principle">
+        <div class="icon">&#9881;</div>
+        <h4>Interactable Workspace</h4>
+        <p>Not static pages — interactive widgets, toggles, drag-and-drop. Every screen is a tool, not a report.</p>
+      </div>
+      <div class="principle">
+        <div class="icon">&#127919;</div>
+        <h4>Niche-Deep, Not Broad</h4>
+        <p>Go deeper into IELTS/language learning than any generic notes app can. Question types, band calculations, spaced repetition — all baked in.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 2: PHASE A ─────────────────────────────── -->
+  <section class="section" id="phase-a">
+    <div class="section-header">
+      <span class="section-num">2</span>
+      <h2>Phase A — Sharpen the Blade</h2>
+    </div>
+
+    <div class="phase-intro">
+      <div class="phase-goal">Goal: Polish existing features to be best-in-class before adding new ones.</div>
+      <p>These ideas enhance what's already built — deeper analytics, smoother UX, faster navigation. Low risk, high impact. Ship first.</p>
+    </div>
+
+    <!-- A1: Deep Analytics Dashboard -->
+    <div class="card" id="deep-analytics">
+      <h3>
+        <span class="badge badge-p0">P0</span>
+        <span class="badge badge-analytics">Analytics</span>
+        Deep Analytics Dashboard
+      </h3>
+      <p>Transform the current analytics page from a summary view into an interactive data exploration tool. Users can filter by date range, module, question type, and session — then see trend lines, distribution histograms, and comparative charts that update in real time.</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-high" style="width:90%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:60%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> The existing heatmap + basic charts leave too much data on the table. Power users (the hub's core audience) want to slice their data freely. This is what separates a hub from a tracker — Notion-level depth applied to IELTS analytics.</div>
+    </div>
+
+    <!-- A2: Inline Editing Everywhere -->
+    <div class="card" id="inline-editing">
+      <h3>
+        <span class="badge badge-p0">P0</span>
+        <span class="badge badge-ux">UX</span>
+        Inline Editing Everywhere
+      </h3>
+      <p>Make every data point — scores, notes, dates, question types — clickable and editable directly in tables, cards, and lists. No more "open detail page, find field, edit, save, go back." Click a cell, type, press Enter. Undo supported. This applies to session logs, vocab entries, grammar notes, and all tracking tables.</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-high" style="width:90%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:55%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> "Editable everything" is the number one differentiator from static test-prep sites. This is what makes it feel like Notion — a workspace you control, not a read-only dashboard. Every extra click to edit is a user lost.</div>
+    </div>
+
+    <!-- A3: Readiness Score -->
+    <div class="card" id="readiness-score">
+      <h3>
+        <span class="badge badge-p0">P0</span>
+        <span class="badge badge-analytics">Analytics</span>
+        Readiness Score (True Band Estimate)
+      </h3>
+      <p>A calculated metric that estimates the user's "real" band by factoring in un-attempted question types (weighted by official exam frequency), consistency, recent trend direction, and data sufficiency. Displayed as a secondary metric below the user's tracked band average. Types with fewer than 3 data points show as "insufficient data" rather than zero.</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-high" style="width:85%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-low" style="width:40%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> Most learners only practice question types they're comfortable with. The Readiness Score exposes blind spots honestly — but uses official frequency weighting and a "Readiness" framing to motivate rather than demoralize. Named "Readiness" instead of "True Average Band" to avoid crushing confidence.</div>
+    </div>
+
+    <!-- A4: Global Search / Cmd+K -->
+    <div class="card" id="global-search">
+      <h3>
+        <span class="badge badge-p1">P1</span>
+        <span class="badge badge-ux">UX</span>
+        Global Search / Cmd+K
+      </h3>
+      <p>A spotlight-style search palette (Cmd+K / Ctrl+K) that searches across all data: vocab entries, grammar notes, session logs, topics, settings. Results grouped by type with keyboard navigation. Also serves as a quick-action launcher: "Add vocab," "Log listening session," "Go to analytics."</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-high" style="width:80%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:50%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> As the hub grows, finding things becomes the bottleneck. Notion, Linear, Raycast — every serious productivity tool has Cmd+K. This is table stakes for a hub that wants to replace scattered tools.</div>
+    </div>
+
+    <!-- A5: Confidence Trend Lines -->
+    <div class="card" id="confidence-trends">
+      <h3>
+        <span class="badge badge-p1">P1</span>
+        <span class="badge badge-analytics">Analytics</span>
+        Confidence Trend Lines
+      </h3>
+      <p>Per-question-type trend lines showing accuracy over time with a smoothed moving average. Visible on both the analytics page and individual module pages. Color-coded: improving (green slope), stagnating (yellow flat), declining (red slope). Helps users see if their practice is actually working.</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:70%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-low" style="width:35%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> Current heatmaps show a snapshot — users can't tell if they're getting better or worse at a specific type. Trend lines close this gap and give emotional reward ("I'm improving!") or early warning ("This is slipping"). Recharts makes this low-effort.</div>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 3: PHASE B ─────────────────────────────── -->
+  <section class="section" id="phase-b">
+    <div class="section-header">
+      <span class="section-num">3</span>
+      <h2>Phase B — Expand the Hub</h2>
+    </div>
+
+    <div class="phase-intro">
+      <div class="phase-goal">Goal: Add new hub capabilities that make IELTS Hub the single destination for all study activities.</div>
+      <p>These are new features that turn the app from a tracker into a workspace. Each one adds a "reason to come back" and reduces the need for external tools.</p>
+    </div>
+
+    <!-- B1: Resource Library -->
+    <div class="card" id="resource-library">
+      <h3>
+        <span class="badge badge-p0">P0</span>
+        <span class="badge badge-hub">Hub</span>
+        Resource Library
+      </h3>
+      <p>A DB-backed, taggable collection where users save links to practice tests, YouTube channels, podcasts, articles, and study materials — organized by module, difficulty, and custom tags. Each resource shows a usage counter, personal rating, and notes. Bulk-add via paste. Admin can seed curated starter resources.</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-high" style="width:85%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:55%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> Every IELTS learner maintains scattered bookmarks across browsers, notes apps, and chat groups. A built-in resource library with IELTS-specific tagging (module, question type, band level) is something no generic bookmark manager offers. This is a core hub feature — centralizing everything in one place.</div>
+    </div>
+
+    <!-- B2: Calendar Planner -->
+    <div class="card" id="calendar-planner">
+      <h3>
+        <span class="badge badge-p1">P1</span>
+        <span class="badge badge-hub">Hub</span>
+        Calendar Planner
+      </h3>
+      <p>A weekly study planner where users block out study sessions, assign modules/topics, and track completion. MVP: weekly grid view with checkboxes per slot. Phase 2: month view. Phase 3: AI-suggested study plan based on weaknesses and exam date. Integrates with the streak system.</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-high" style="width:80%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:65%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> "What should I study today?" is the #1 question learners ask. A visual planner answers this daily and creates a habit loop (plan → execute → check off → see streak). Scoped to weekly grid MVP to avoid scope creep — full calendar can come later.</div>
+    </div>
+
+    <!-- B3: Exam Quarter Integration -->
+    <div class="card" id="exam-quarter">
+      <h3>
+        <span class="badge badge-p1">P1</span>
+        <span class="badge badge-content">Content</span>
+        Exam Quarter Awareness
+      </h3>
+      <p>Ambient awareness of the current IELTS exam cycle: which speaking topics are "in season" (current quarter forecast), countdown to the user's exam date, and study urgency indicators. The forecast data already exists in the DB (seed-forecast-q2-2026.sql) — this surfaces it prominently in the dashboard and speaking module.</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:75%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-low" style="width:30%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> The forecast seed data is already in the DB but barely surfaced. Making it prominent gives users exam-relevant context without them having to research elsewhere. Low effort, high relevance — this is exactly what a hub should do: aggregate context.</div>
+    </div>
+
+    <!-- B4: Question Type Wiki -->
+    <div class="card" id="type-wiki">
+      <h3>
+        <span class="badge badge-p2">P2</span>
+        <span class="badge badge-content">Content</span>
+        Question Type Wiki
+      </h3>
+      <p>A built-in reference for each of the 41 tracked question types: what it looks like, common traps, strategies, official frequency, and links to the user's own performance data for that type. Editable — users can add their own notes per type. Serves as a quick-reference during practice.</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:65%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:55%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> The app tracks 41 question types but doesn't explain what they are. New users (and even experienced ones) need a quick reference. Making it editable turns it from a static FAQ into a personal strategy notebook per type — hub behavior, not tutorial behavior.</div>
+    </div>
+
+    <!-- B5: Cross-Module Linking -->
+    <div class="card" id="cross-module">
+      <h3>
+        <span class="badge badge-p2">P2</span>
+        <span class="badge badge-hub">Hub</span>
+        Cross-Module Linking
+      </h3>
+      <p>Connect data across modules: link a vocab entry to a writing essay where it was used, link a grammar rule to listening errors it caused, link a speaking topic to relevant reading passages. Bi-directional — view related items from either side. Think wiki-style [[backlinks]].</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:70%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:60%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> IELTS skills are interconnected — a weak grammar point affects writing, listening, and speaking. But current tools treat each module as a silo. Cross-linking is what makes a hub a hub, not just four separate trackers glued together. This is the Notion/Obsidian-style linking applied to language learning.</div>
+    </div>
+
+    <!-- B6: Weekly Digest -->
+    <div class="card" id="weekly-digest">
+      <h3>
+        <span class="badge badge-p2">P2</span>
+        <span class="badge badge-analytics">Analytics</span>
+        Weekly Study Digest
+      </h3>
+      <p>An auto-generated weekly summary: total study time, sessions completed, band movement, streak status, top-improved type, weakest type, and one suggested focus for next week. Displayed as a dismissible card on the dashboard every Monday. Optionally emailable.</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:65%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-low" style="width:40%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> Weekly digests are the "glue" that keeps users coming back. Without them, users must manually assess progress. A pre-built weekly summary turns passive data into an active nudge — and the suggestion engine already has the data to power this.</div>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 4: PHASE C ─────────────────────────────── -->
+  <section class="section" id="phase-c">
+    <div class="section-header">
+      <span class="section-num">4</span>
+      <h2>Phase C — Power Tools</h2>
+    </div>
+
+    <div class="phase-intro">
+      <div class="phase-goal">Goal: Add differentiating features that make IELTS Hub irreplaceable for serious learners.</div>
+      <p>These are heavier features that require more effort but create strong moats. Each one gives users a reason to stay that's hard to replicate elsewhere.</p>
+    </div>
+
+    <!-- C1: Mistake Journal -->
+    <div class="card" id="mistake-journal">
+      <h3>
+        <span class="badge badge-p1">P1</span>
+        <span class="badge badge-hub">Hub</span>
+        Mistake Journal
+      </h3>
+      <p>A dedicated section to log, categorize, and review mistakes across all modules. Each entry captures: what the mistake was, why it happened (carelessness, knowledge gap, time pressure), the correct approach, and which question type it occurred in. Supports tagging, filtering, and spaced-repetition-style review of past mistakes.</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-high" style="width:85%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:55%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> "Error journals" are recommended by every IELTS tutor but no digital tool supports them well. Learners use paper or random notes apps. A structured mistake journal with tagging and spaced review is a killer feature — it turns mistakes into a study system, not just regrets.</div>
+    </div>
+
+    <!-- C2: Study Timer -->
+    <div class="card" id="study-timer">
+      <h3>
+        <span class="badge badge-p2">P2</span>
+        <span class="badge badge-ux">UX</span>
+        Study Timer / Pomodoro
+      </h3>
+      <p>Built-in study timer with Pomodoro mode (25/5 or custom intervals). Auto-logs study time to the relevant module. Persists across page navigation. Shows in a floating mini-widget or status bar. Integrates with daily activity tracking and streak calculations.</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:65%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-low" style="width:40%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> Learners currently switch to separate timer apps (Forest, Toggl, phone timers). An integrated timer that auto-logs to the right module eliminates that context switch. It also makes study time tracking automatic instead of manual — better data for analytics.</div>
+    </div>
+
+    <!-- C3: Writing & Speaking Heatmaps -->
+    <div class="card" id="ws-heatmaps">
+      <h3>
+        <span class="badge badge-p2">P2</span>
+        <span class="badge badge-analytics">Analytics</span>
+        Writing &amp; Speaking Heatmaps
+      </h3>
+      <p>Extend the existing heatmap visualization (currently Listening + Reading only) to cover Writing and Speaking. Writing: heatmap by task type (Task 1 types: line graph, bar chart, pie, table, map, process, mixed; Task 2: opinion, discussion, problem-solution, two-part, advantage-disadvantage). Speaking: heatmap by Part 1/2/3 topic categories.</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:70%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:50%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> The heatmap is one of the most visually powerful features but only covers half the exam. Extending it to Writing and Speaking gives users the same "weakness at a glance" insight for all four modules. The visualization code already exists — this is mostly data modeling.</div>
+    </div>
+
+    <!-- C4: Batch Import -->
+    <div class="card" id="batch-import">
+      <h3>
+        <span class="badge badge-p2">P2</span>
+        <span class="badge badge-core">Core</span>
+        Batch Import
+      </h3>
+      <p>Import data from CSV/spreadsheets: past test scores, vocab lists, grammar notes. Supports mapping columns to fields. Validates data before import. Essential for users migrating from spreadsheets or other tools. Also enables bulk-add of vocab (paste a list of words).</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:70%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:55%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> The biggest friction for a new hub is "I already have data elsewhere." Batch import removes that barrier. Users who already track IELTS scores in Excel can switch without losing history. This is also competitive — most IELTS apps have no import feature at all.</div>
+    </div>
+
+    <!-- C5: Tutor / Shared View -->
+    <div class="card" id="tutor-view">
+      <h3>
+        <span class="badge badge-p2">P2</span>
+        <span class="badge badge-social">Social</span>
+        Tutor / Shared View
+      </h3>
+      <p>Generate a read-only shareable link to the user's analytics and progress. Tutors can see the student's heatmap, trend lines, mistake patterns, and practice frequency without needing an account. Time-limited link (expires after 7 days by default). No editing access.</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:70%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:55%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> Many IELTS learners work with tutors (online or offline). Currently they screenshot their data. A shareable read-only view is a viral growth mechanism — every tutor who sees it becomes aware of the product. It also positions the hub as a professional tool, not just a student toy.</div>
+    </div>
+
+    <!-- C6: Speaking Recorder -->
+    <div class="card" id="speaking-recorder">
+      <h3>
+        <span class="badge badge-p2">P2</span>
+        <span class="badge badge-ai">AI</span>
+        Speaking Recorder &amp; Self-Review
+      </h3>
+      <p>Record speaking practice directly in the hub, then replay and self-annotate: mark hesitations, fillers, pronunciation issues, and good moments. AI provides optional fluency metrics (words per minute, filler count, pause length). Saved recordings linked to topic and date. Framing: "Record and analyze YOUR speaking" — a journaling tool, not a test simulator.</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:70%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-high" style="width:75%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> Speaking is the hardest module to self-study because learners can't hear themselves objectively. Recording + self-annotation is a proven journaling technique. AI metrics add objective data. Careful framing as a "recorder" (hub behavior) not a "test" (teaching behavior) keeps it on brand.</div>
+    </div>
+
+    <!-- C7: Export to PDF -->
+    <div class="card" id="export-pdf">
+      <h3>
+        <span class="badge badge-p2">P2</span>
+        <span class="badge badge-core">Core</span>
+        Export to PDF
+      </h3>
+      <p>Generate a polished PDF report of the user's progress: overall bands, module breakdowns, heatmaps, trend charts, streak data, and key recommendations. Useful for visa applications (proof of IELTS preparation), tutor meetings, and personal records. Customizable: choose which sections to include.</p>
+      <div class="meter">
+        <div class="meter-item"><span class="meter-label">Impact</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:60%"></div></div></div>
+        <div class="meter-item"><span class="meter-label">Effort</span><div class="meter-bar"><div class="meter-fill fill-med" style="width:55%"></div></div></div>
+      </div>
+      <div class="idea-why"><strong>Why:</strong> "Data ownership" means users can take their data out. A well-designed PDF export is practical (tutor meetings, visa docs) and psychologically satisfying (tangible proof of progress). It also reinforces trust — the hub isn't locking data in.</div>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 5: PHASE D ─────────────────────────────── -->
+  <section class="section" id="phase-d">
+    <div class="section-header">
+      <span class="section-num">5</span>
+      <h2>Phase D — Ecosystem Play</h2>
+    </div>
+
+    <div class="phase-intro">
+      <div class="phase-goal">Goal: Long-term features that expand the hub into a full ecosystem — social, customizable, multi-platform.</div>
+      <p>These ideas shape the product's future identity. Each is individually valuable but best built on top of the solid foundation from Phases A-C. Prioritize based on user demand signals.</p>
+    </div>
+
+    <!-- D1: Goal-Setting Engine -->
+    <div class="card" id="goal-engine">
+      <h3>
+        <span class="badge badge-p2">P2</span>
+        <span class="badge badge-hub">Hub</span>
+        Goal-Setting Engine
+      </h3>
+      <p>Users set target bands per module and a target exam date. The system calculates required improvement rate, shows a progress-to-goal gauge, and warns if the user is falling behind pace. Goals are visible on the dashboard and influence the recommendation engine's urgency factor.</p>
+      <div class="idea-why"><strong>Why:</strong> Goals give structure to practice. Without them, users drift. A visual "you need to improve 0.5 bands in 6 weeks" creates urgency and focus — exactly what the hub should provide as a planning tool.</div>
+    </div>
+
+    <!-- D2: Rich-Text Notes -->
+    <div class="card" id="rich-notes">
+      <h3>
+        <span class="badge badge-p2">P2</span>
+        <span class="badge badge-hub">Hub</span>
+        Rich-Text Notes (Mini Notion)
+      </h3>
+      <p>Upgrade text fields across the app from plain text to a lightweight rich-text editor: bold, italic, bullet lists, headings, code blocks, and inline images. Most impactful in vocab definitions, grammar notes, essay drafts, and the mistake journal. Not a full Notion clone — just enough formatting to make notes useful.</p>
+      <div class="idea-why"><strong>Why:</strong> Plain text notes feel limiting — users want to bold key points, add example sentences with formatting, and structure their thoughts. Rich text is the bridge between "tracker" and "workspace." Scope carefully: Tiptap or Slate.js as editor, not a custom solution.</div>
+    </div>
+
+    <!-- D3: Smart Notifications -->
+    <div class="card" id="notifications">
+      <h3>
+        <span class="badge badge-p3">P3</span>
+        <span class="badge badge-ux">UX</span>
+        Smart Notifications
+      </h3>
+      <p>In-app and optional push notifications: spaced repetition reminders, streak danger alerts, weekly digest nudges, exam date countdowns, and "you haven't practiced [module] in X days" prompts. Configurable — users choose which notifications to receive and when.</p>
+      <div class="idea-why"><strong>Why:</strong> Retention depends on re-engagement. Thoughtful, configurable notifications bring users back at the right moment. The key is "smart" — not spammy. Notifications tied to actual user behavior (declining streak, overdue vocab review) feel helpful, not annoying.</div>
+    </div>
+
+    <!-- D4: Achievement Sharing -->
+    <div class="card" id="achievement-sharing">
+      <h3>
+        <span class="badge badge-p3">P3</span>
+        <span class="badge badge-social">Social</span>
+        Achievement Sharing
+      </h3>
+      <p>Generate shareable cards (images) for milestones: new band achieved, streak record, badge earned, level up. Designed for Instagram Stories, Twitter, and study group chats. Branded with IELTS Hub watermark. One-click share from the achievement modal.</p>
+      <div class="idea-why"><strong>Why:</strong> Gamification badges are already built but have no external reach. Shareable cards turn every achievement into organic marketing. IELTS study groups on Facebook and Telegram are massive — every shared card is a potential new user.</div>
+    </div>
+
+    <!-- D5: Dashboard Toggles -->
+    <div class="card" id="dashboard-toggles">
+      <h3>
+        <span class="badge badge-p2">P2</span>
+        <span class="badge badge-ux">UX</span>
+        Dashboard Toggles / Layout Control
+      </h3>
+      <p>Let users show/hide dashboard widgets and rearrange their order. Some users want dense data; others want a clean overview. Persist layout preferences per user. MVP: toggle visibility of each widget card. Future: drag-and-drop reordering.</p>
+      <div class="idea-why"><strong>Why:</strong> "Interactable workspace" means users control their view. A one-size-fits-all dashboard frustrates both data-heavy users and minimalists. This is a small feature with outsized "it feels like MY tool" impact.</div>
+    </div>
+
+    <!-- D6: Multi-Source View -->
+    <div class="card" id="multi-source">
+      <h3>
+        <span class="badge badge-p3">P3</span>
+        <span class="badge badge-hub">Hub</span>
+        Multi-Source Aggregation View
+      </h3>
+      <p>A unified "recent activity" feed that combines data from all modules: last 3 listening sessions + 2 vocab entries + 1 writing draft + today's grammar review. Single scrollable timeline. Filter by module or date. Think GitHub activity feed but for IELTS study.</p>
+      <div class="idea-why"><strong>Why:</strong> Currently each module is its own silo. A unified activity view shows the "full picture" of study behavior across all four skills — something no module page can do alone. This is the hub's home screen story.</div>
+    </div>
+
+    <!-- D7: Focus Mode -->
+    <div class="card" id="focus-mode">
+      <h3>
+        <span class="badge badge-p3">P3</span>
+        <span class="badge badge-ux">UX</span>
+        Focus Mode
+      </h3>
+      <p>A distraction-free mode that hides the sidebar, nav, and all non-essential UI — leaving only the current task (writing an essay, reviewing vocab, logging scores). Activated via keyboard shortcut or toggle. Pairs well with the study timer.</p>
+      <div class="idea-why"><strong>Why:</strong> Power users don't want chrome when they're in flow. Focus mode is a small UX touch that signals "this is a serious workspace tool" — the same reason Notion, iA Writer, and VS Code all have distraction-free modes.</div>
+    </div>
+
+    <!-- D8: Customizable Widgets -->
+    <div class="card" id="custom-widgets">
+      <h3>
+        <span class="badge badge-p3">P3</span>
+        <span class="badge badge-ux">UX</span>
+        Customizable Dashboard Widgets
+      </h3>
+      <p>Beyond toggles — let users configure what each dashboard card shows. E.g., the "Listening" card could show either "recent sessions" or "weakest question types" or "accuracy trend." Widget library with preset options per card. Drag-and-drop grid layout.</p>
+      <div class="idea-why"><strong>Why:</strong> The ultimate expression of "interactable workspace." Extends Dashboard Toggles into full customization. High effort, but transforms the dashboard from a page into a personal control panel. Build after validating that Dashboard Toggles are actually used.</div>
+    </div>
+
+    <!-- D9: Multi-Exam Support -->
+    <div class="card" id="multi-exam">
+      <h3>
+        <span class="badge badge-p3">P3</span>
+        <span class="badge badge-hub">Hub</span>
+        Multi-Exam Support (TOEFL, PTE, Duolingo)
+      </h3>
+      <p>Abstract the question type system to support other English proficiency exams. Same hub, same UX — different question type taxonomies and scoring systems. Users choose their exam on signup. Data stays unified for cross-exam comparison. Start with TOEFL iBT (closest format), then PTE Academic.</p>
+      <div class="idea-why"><strong>Why:</strong> Massively expands TAM (Total Addressable Market) without rebuilding the product. Many learners take both IELTS and TOEFL. The hub architecture (question types, band calculations, heatmaps) is already abstract enough — most work is just new lookup tables. But only do this after the IELTS experience is rock-solid.</div>
+    </div>
+
+    <!-- D10: Offline-First PWA -->
+    <div class="card" id="offline-first">
+      <h3>
+        <span class="badge badge-p3">P3</span>
+        <span class="badge badge-core">Core</span>
+        Offline-First PWA
+      </h3>
+      <p>Service worker with IndexedDB cache for offline access to vocab review, grammar notes, and score logging. Syncs when back online. PWA manifest for "Add to Home Screen" on mobile. Essential for learners in areas with unreliable internet or who study during commutes.</p>
+      <div class="idea-why"><strong>Why:</strong> IELTS learners are global — many study in locations with spotty internet. Offline-first is also a competitive moat: most web-based IELTS tools are fully online. This is technically complex but unlocks mobile usage without building native apps.</div>
+    </div>
+
+    <!-- D11: Study Groups -->
+    <div class="card" id="study-groups">
+      <h3>
+        <span class="badge badge-p3">P3</span>
+        <span class="badge badge-social">Social</span>
+        Study Groups
+      </h3>
+      <p>Create or join small study groups (4-8 people) with shared progress dashboards, group streaks, and a simple group chat. Members see each other's weekly digests (opt-in). Group leaderboards for friendly competition. Built on existing Supabase real-time capabilities.</p>
+      <div class="idea-why"><strong>Why:</strong> IELTS study is often social — Facebook groups, Telegram chats, study buddy arrangements. Bringing this into the hub creates network effects and retention. Groups keep users accountable. But this is a Phase D feature because it needs the core experience to be polished first.</div>
+    </div>
+
+    <!-- D12: Peer Review Exchange -->
+    <div class="card" id="peer-review">
+      <h3>
+        <span class="badge badge-p3">P3</span>
+        <span class="badge badge-social">Social</span>
+        Peer Review Exchange
+      </h3>
+      <p>Users submit Writing Task 2 essays for peer review and review others' essays in return. Structured feedback form (not free text) based on IELTS criteria: Task Response, Coherence, Lexical Resource, Grammar. Earn XP for reviewing. Moderated with quality gates.</p>
+      <div class="idea-why"><strong>Why:</strong> AI essay grading exists but human feedback is different. Peer review creates community engagement, gives users practice at evaluating writing (which improves their own), and generates content for the platform. But heavy moderation needed — save for when the user base justifies it.</div>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 6: PRIORITY MATRIX ────────────────────── -->
+  <section class="section" id="matrix">
+    <div class="section-header">
+      <span class="section-num">6</span>
+      <h2>Priority Matrix</h2>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Idea</th>
+            <th>Phase</th>
+            <th>Priority</th>
+            <th>Impact</th>
+            <th>Effort</th>
+            <th>Category</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Deep Analytics Dashboard</td><td>A</td><td><span class="badge badge-p0">P0</span></td><td>&#9733;&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-analytics">Analytics</span></td></tr>
+          <tr><td>2</td><td>Inline Editing Everywhere</td><td>A</td><td><span class="badge badge-p0">P0</span></td><td>&#9733;&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
+          <tr><td>3</td><td>Readiness Score</td><td>A</td><td><span class="badge badge-p0">P0</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;</td><td><span class="badge badge-analytics">Analytics</span></td></tr>
+          <tr><td>4</td><td>Resource Library</td><td>B</td><td><span class="badge badge-p0">P0</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
+          <tr><td>5</td><td>Global Search / Cmd+K</td><td>A</td><td><span class="badge badge-p1">P1</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
+          <tr><td>6</td><td>Confidence Trend Lines</td><td>A</td><td><span class="badge badge-p1">P1</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;</td><td><span class="badge badge-analytics">Analytics</span></td></tr>
+          <tr><td>7</td><td>Calendar Planner</td><td>B</td><td><span class="badge badge-p1">P1</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
+          <tr><td>8</td><td>Exam Quarter Awareness</td><td>B</td><td><span class="badge badge-p1">P1</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9734;</td><td><span class="badge badge-content">Content</span></td></tr>
+          <tr><td>9</td><td>Mistake Journal</td><td>C</td><td><span class="badge badge-p1">P1</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
+          <tr><td>10</td><td>Question Type Wiki</td><td>B</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-content">Content</span></td></tr>
+          <tr><td>11</td><td>Cross-Module Linking</td><td>B</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
+          <tr><td>12</td><td>Weekly Study Digest</td><td>B</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;</td><td><span class="badge badge-analytics">Analytics</span></td></tr>
+          <tr><td>13</td><td>Study Timer / Pomodoro</td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
+          <tr><td>14</td><td>Writing &amp; Speaking Heatmaps</td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-analytics">Analytics</span></td></tr>
+          <tr><td>15</td><td>Batch Import</td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-core">Core</span></td></tr>
+          <tr><td>16</td><td>Tutor / Shared View</td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-social">Social</span></td></tr>
+          <tr><td>17</td><td>Speaking Recorder</td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;&#9733;</td><td><span class="badge badge-ai">AI</span></td></tr>
+          <tr><td>18</td><td>Export to PDF</td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-core">Core</span></td></tr>
+          <tr><td>19</td><td>Goal-Setting Engine</td><td>D</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
+          <tr><td>20</td><td>Rich-Text Notes</td><td>D</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
+          <tr><td>21</td><td>Dashboard Toggles</td><td>D</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
+          <tr><td>22</td><td>Smart Notifications</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
+          <tr><td>23</td><td>Achievement Sharing</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;</td><td><span class="badge badge-social">Social</span></td></tr>
+          <tr><td>24</td><td>Multi-Source View</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
+          <tr><td>25</td><td>Focus Mode</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9734;</td><td>&#9733;&#9734;</td><td><span class="badge badge-ux">UX</span></td></tr>
+          <tr><td>26</td><td>Customizable Widgets</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
+          <tr><td>27</td><td>Multi-Exam Support</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
+          <tr><td>28</td><td>Offline-First PWA</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;&#9733;&#9733;</td><td><span class="badge badge-core">Core</span></td></tr>
+          <tr><td>29</td><td>Study Groups</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;&#9733;</td><td><span class="badge badge-social">Social</span></td></tr>
+          <tr><td>30</td><td>Peer Review Exchange</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;&#9733;&#9733;</td><td><span class="badge badge-social">Social</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top: 24px; border-top: 3px solid #00ff88;">
+      <h3 style="margin-bottom: 12px;">Reading this Matrix</h3>
+      <p><strong>Priority tiers:</strong> <span class="badge badge-p0">P0</span> = build immediately (next sprint), <span class="badge badge-p1">P1</span> = build soon (this month), <span class="badge badge-p2">P2</span> = build when stable (next month), <span class="badge badge-p3">P3</span> = build when validated (backlog).</p>
+      <p><strong>Impact</strong> = how much this moves the product toward "ultimate language learning hub." <strong>Effort</strong> = implementation complexity (more stars = more work).</p>
+      <p><strong>Best bang for buck:</strong> Readiness Score (P0, high impact, low effort), Exam Quarter Awareness (P1, mid impact, very low effort), Confidence Trend Lines (P1, mid impact, low effort). These three can ship in a single sprint and collectively make the analytics story dramatically stronger.</p>
+    </div>
+  </section>
+
+</main>
+</div>
+</body>
+</html>

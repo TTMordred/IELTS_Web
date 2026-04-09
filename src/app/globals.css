@@ -1,0 +1,474 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TAILWIND 4 THEME — Royal Dark Emerald Accent System
+   Complete redesign: sophisticated dark emerald + clean neutral palette
+───────────────────────────────────────────────────────────────────────────────── */
+@theme inline {
+  /* ── Accent: Royal Dark Emerald ── */
+  --color-accent: #1B4D3E;
+  --color-accent-hover: #163F33;
+  --color-accent-light: #E8F5EE;
+  --color-accent-text: #1B4D3E;
+
+  /* ── Light Mode: Surfaces ── */
+  --color-body: #F8F9FA;
+  --color-card: #FFFFFF;
+  --color-elevated: #FFFFFF;
+  --color-sidebar: #F1F3F5;
+  --color-surface-hover: #F0F1F3;
+
+  /* ── Light Mode: Text ── */
+  --color-ink: #1A1A2E;
+  --color-ink-secondary: #5C6370;
+  --color-ink-muted: #9CA3AF;
+
+  /* ── Light Mode: Borders ── */
+  --color-line: #E5E7EB;
+  --color-line-light: #F0F1F3;
+
+  /* ── Status Colors ── */
+  --color-critical: #E53E3E;
+  --color-high: #DD6B20;
+  --color-medium: #D69E2E;
+  --color-low: #38A169;
+  --color-info: #3182CE;
+  --color-paused: #805AD5;
+
+  /* ── Shadows — Layered depth system ── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-elevated: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 0 3px rgba(27, 77, 62, 0.15);
+  --shadow-accent: 0 4px 14px rgba(27, 77, 62, 0.15);
+  --shadow-accent-lg: 0 8px 24px rgba(27, 77, 62, 0.2);
+
+  /* ── Transitions ── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 350ms;
+
+  /* ── Border Radius ── */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BASE STYLES
+───────────────────────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-body);
+  color: var(--color-ink);
+  font-family: var(--font-sans, 'Inter', system-ui, -apple-system, sans-serif);
+  font-size: 0.875rem; /* 14px base */
+  line-height: 1.6;
+  letter-spacing: -0.011em;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--duration-base) var(--ease-out), color var(--duration-base) var(--ease-out);
+}
+
+/* Links */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Selection — accent green for brand consistency */
+::selection {
+  background: var(--color-accent);
+  color: #FFFFFF;
+}
+
+/* Focus ring for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Ensure all interactive elements have visible focus rings */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DARK MODE — via [data-theme="dark"] attribute
+   Overrides CSS custom properties for comprehensive dark theme
+───────────────────────────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  /* ── Dark Mode: Surfaces — 4-layer depth system ── */
+  --color-body: #0B0F14;
+  --color-card: #131920;
+  --color-elevated: #1A2028;
+  --color-sidebar: #0B0F14;
+  --color-surface-hover: #1E2530;
+
+  /* ── Dark Mode: Text — higher contrast ── */
+  --color-ink: #F0F4F8;
+  --color-ink-secondary: #94A3B8;
+  --color-ink-muted: #64748B;
+
+  /* ── Dark Mode: Borders — softer, more translucent ── */
+  --color-line: rgba(148, 163, 184, 0.12);
+  --color-line-light: rgba(148, 163, 184, 0.06);
+
+  /* ── Dark Mode: Accent adjustments ── */
+  --color-accent: #22C55E;
+  --color-accent-hover: #16A34A;
+  --color-accent-light: rgba(34, 197, 94, 0.1);
+  --color-accent-text: #4ADE80;
+
+  /* ── Dark Mode: Shadows — deeper, more dramatic ── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+  --shadow-elevated: 0 10px 15px -3px rgba(0, 0, 0, 0.35), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+  --shadow-glow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+  --shadow-accent: 0 4px 14px rgba(34, 197, 94, 0.2);
+  --shadow-accent-lg: 0 8px 24px rgba(34, 197, 94, 0.25);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   UTILITY CLASSES — Production-quality component helpers
+───────────────────────────────────────────────────────────────────────────────── */
+
+@utility card-base {
+  background: var(--color-card);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+@utility card-interactive {
+  background: var(--color-card);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: all var(--duration-base) var(--ease-out);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-card);
+  }
+}
+
+@utility card-elevated {
+  background: var(--color-card);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-elevated);
+}
+
+@utility heading-lg {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+
+@utility heading-md {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  color: var(--color-ink);
+}
+
+@utility heading-sm {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.4;
+  color: var(--color-ink);
+}
+
+@utility section-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-muted);
+}
+
+@utility status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+/* Status badge utilities */
+@utility status-critical {
+  background: var(--color-critical);
+}
+
+@utility status-high {
+  background: var(--color-high);
+}
+
+@utility status-medium {
+  background: var(--color-medium);
+}
+
+@utility status-low {
+  background: var(--color-low);
+}
+
+@utility status-info {
+  background: var(--color-info);
+}
+
+@utility status-paused {
+  background: var(--color-paused);
+}
+
+/* Focus ring utilities for interactive elements */
+@utility focus-ring {
+  box-shadow: var(--shadow-glow);
+}
+
+/* Accent utilities */
+@utility text-accent {
+  color: var(--color-accent);
+}
+
+/* Nav active — force white text on accent background */
+@utility nav-active {
+  background-color: var(--color-accent);
+  color: #FFFFFF !important;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(27, 77, 62, 0.2);
+}
+
+@utility bg-accent-subtle {
+  background-color: var(--color-accent-light);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ANIMATION KEYFRAMES — Premium micro-interactions
+───────────────────────────────────────────────────────────────────────────────── */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(27, 77, 62, 0); }
+  50% { box-shadow: 0 0 0 6px rgba(27, 77, 62, 0.08); }
+}
+
+[data-theme="dark"] {
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.1); }
+  }
+}
+
+/* Animation utilities */
+@utility animate-fade-in {
+  animation: fade-in var(--duration-base) var(--ease-out);
+}
+
+@utility animate-fade-in-up {
+  animation: fade-in-up var(--duration-base) var(--ease-out);
+}
+
+@utility animate-slide-in {
+  animation: slide-in-right var(--duration-base) var(--ease-out);
+}
+
+@utility animate-scale-in {
+  animation: scale-in var(--duration-base) var(--ease-spring);
+}
+
+/* Shimmer loading effect — premium alternative to pulse */
+@utility skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-line-light) 25%,
+    var(--color-surface-hover) 50%,
+    var(--color-line-light) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Staggered children animation */
+@utility stagger-children {
+  & > * {
+    animation: fade-in-up var(--duration-base) var(--ease-out) both;
+  }
+  & > *:nth-child(1) { animation-delay: 0ms; }
+  & > *:nth-child(2) { animation-delay: 50ms; }
+  & > *:nth-child(3) { animation-delay: 100ms; }
+  & > *:nth-child(4) { animation-delay: 150ms; }
+  & > *:nth-child(5) { animation-delay: 200ms; }
+  & > *:nth-child(6) { animation-delay: 250ms; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   INTERACTIVE ELEMENT ENHANCEMENTS
+───────────────────────────────────────────────────────────────────────────────── */
+
+/* Smooth transitions on all interactive elements */
+button, a, input, select, textarea, [role="button"] {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-out);
+}
+
+/* Press feedback for buttons */
+button:active:not(:disabled),
+[role="button"]:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Table row hover — subtle accent tint */
+tbody tr {
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+/* Scrollbar styling for dark mode */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 4px;
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.25);
+}
+
+
+/* ── Rich Text Editor (Tiptap) ── */
+.rte-content .tiptap,
+.rte-content .ProseMirror {
+  outline: none;
+  min-height: var(--rte-min-h, 120px);
+}
+
+/* Placeholder */
+.rte-content .tiptap p.is-editor-empty:first-child::before,
+.rte-content .ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--color-ink-muted);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Rich Text Display — rendered HTML */
+.rte-display h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: var(--color-ink);
+}
+.rte-display p {
+  margin-bottom: 0.4rem;
+  line-height: 1.6;
+}
+.rte-display ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin-bottom: 0.4rem;
+}
+.rte-display li {
+  margin-bottom: 0.15rem;
+  line-height: 1.5;
+}
+.rte-display strong {
+  font-weight: 600;
+}
+.rte-display em {
+  font-style: italic;
+}
+
+/* ── Mobile Table Scroll Gradient ── */
+@media (max-width: 768px) {
+  .table-scroll-gradient {
+    position: relative;
+  }
+  .table-scroll-gradient::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 24px;
+    background: linear-gradient(to right, transparent, var(--color-card));
+    pointer-events: none;
+  }
+}
