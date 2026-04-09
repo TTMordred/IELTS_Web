@@ -66,16 +66,20 @@ export default async function DashboardPage() {
 
   const totalRecords = (listening.count || 0) + (reading.count || 0) + (writing.count || 0) + (speaking.count || 0);
   const level = getLevel(profile.total_xp || 0);
-  const readinessData = await getReadinessData();
-  const digestData = await getWeeklyDigest();
-
   // Forecast topics for current quarter
   const currentQuarter = `Q${Math.ceil((new Date().getMonth() + 1) / 3)}/${new Date().getFullYear()}`;
-  const { data: forecastTopics } = await supabase
-    .from("global_topics")
-    .select("name, part")
-    .eq("is_forecast", true)
-    .eq("forecast_quarter", currentQuarter);
+
+  // Run remaining independent fetches in parallel instead of sequentially
+  const [readinessData, digestData, forecastResult] = await Promise.all([
+    getReadinessData(),
+    getWeeklyDigest(),
+    supabase
+      .from("global_topics")
+      .select("name, part")
+      .eq("is_forecast", true)
+      .eq("forecast_quarter", currentQuarter),
+  ]);
+  const forecastTopics = forecastResult.data;
 
   // Days until exam (computed server-side, stable per request)
   const now = new Date();
