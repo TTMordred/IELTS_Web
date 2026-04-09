@@ -14,8 +14,11 @@ All-in-one tracking, notes, and analytics platform for IELTS self-study.
 - **Topics Marketplace** — Global topic bank where users contribute and upvote topics
 - **Speaking Forecast** — Quarterly forecast with sample questions (admin-managed)
 - **AI Grading** — Gemini Flash-powered essay grading and speaking evaluation
+- **Rich-Text Notes** — Tiptap-powered editor in grammar notes, writing essays, and mistake journal (bold, italic, bullet lists, headings)
+- **Smart Notifications** — DB-backed in-app bell with streak-at-risk, vocab review due, writing reminder, and achievement-unlocked alerts
+- **Achievement Sharing** — Canvas-generated PNG cards (1200×630) with download and clipboard copy buttons
 - **Admin Dashboard** — User stats, activity feed, AI settings toggle, forecast management
-- **Gamification** — XP, streaks, levels, badges
+- **Gamification** — XP, streaks, levels, badges, customizable dashboard widgets
 - **PWA** — Installable web app
 
 ## Tech Stack
@@ -25,6 +28,7 @@ All-in-one tracking, notes, and analytics platform for IELTS self-study.
 - **Tailwind CSS 4**
 - **Supabase** (PostgreSQL + Auth + RLS)
 - **Gemini AI** (Flash model for cost efficiency)
+- **Tiptap v3** (Rich-text editor)
 - **Recharts** (Charts and visualizations)
 
 ## Getting Started
@@ -55,6 +59,9 @@ All-in-one tracking, notes, and analytics platform for IELTS self-study.
    supabase/schema.sql
    supabase/schema-2.1.sql
    supabase/schema-2.2.sql
+   supabase/schema-2.3.sql
+   supabase/schema-2.4.sql
+   supabase/schema-notifications.sql
    supabase/seed-forecast-q2-2026.sql
    ```
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import type { NotificationRow } from "@/app/(app)/notifications/actions";
+import { LEVEL_THRESHOLDS } from "@/lib/constants/gamification";
 
 const ACHIEVEMENT_LEVELS = [5, 10, 20, 30, 40, 50];
 
@@ -89,7 +90,6 @@ export async function GET() {
 
   const inserts: Omit<NotificationRow, "id" | "user_id" | "created_at">[] = [];
 
-  // streak_at_risk: has a streak but no activity today
   const streak = profile.data?.current_streak ?? 0;
   const activeToday = (dailyActivityToday.data?.length ?? 0) > 0;
   if (streak > 0 && !activeToday) {
@@ -105,7 +105,6 @@ export async function GET() {
     }
   }
 
-  // vocab_review_due: cards overdue
   const vocabCount = vocabDue.count ?? 0;
   if (vocabCount > 0) {
     const already = await alreadyNotifiedToday(supabase, user.id, "vocab_review_due");
@@ -120,7 +119,6 @@ export async function GET() {
     }
   }
 
-  // writing_reminder: no writing entry in last 7 days
   if (lastWriting.data) {
     const lastDate = lastWriting.data[0]?.date;
     if (lastDate) {
@@ -142,9 +140,7 @@ export async function GET() {
     }
   }
 
-  // achievement_unlocked: XP level milestones
   const totalXp = profile.data?.total_xp ?? 0;
-  const { LEVEL_THRESHOLDS } = await import("@/lib/constants/gamification");
   for (const milestoneLevel of ACHIEVEMENT_LEVELS) {
     const threshold = LEVEL_THRESHOLDS.find((t) => t.level === milestoneLevel);
     if (!threshold) continue;
@@ -162,14 +158,12 @@ export async function GET() {
     }
   }
 
-  // Insert new notifications
   if (inserts.length > 0) {
     await supabase.from("notifications").insert(
       inserts.map((n) => ({ ...n, user_id: user.id }))
     );
   }
 
-  // Return current notifications
   const { data: notifications } = await supabase
     .from("notifications")
     .select("*")

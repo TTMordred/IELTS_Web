@@ -99,6 +99,8 @@
   .badge-content { background: #D85A3020; color: #D85A30; }
   .badge-social { background: #99355620; color: #993556; }
   .badge-core { background: #1D9E7520; color: #1D9E75; }
+  .badge-shipped { background: #00ff8825; color: #00ff88; border: 1px solid #00ff8840; }
+  .card-shipped { border-left: 3px solid #00ff88; }
 
   /* ─── Impact/Effort Meter ──────────────────────────────── */
   .meter { display: flex; gap: 16px; margin-top: 10px; font-size: 0.78rem; }
@@ -215,7 +217,7 @@
   <header class="page-header" id="top">
     <h1>IELTS Hub — <span>Development Roadmap</span></h1>
     <div class="subtitle">From Tracker to the Ultimate Language Learning Hub</div>
-    <div class="version">v3 &middot; 2026-04-05 &middot; AgentLoop 4/4 &middot; 30 Ideas</div>
+    <div class="version">v6 &middot; 2026-04-09 &middot; Phase A-D Largely Complete &middot; 30 Ideas</div>
   </header>
 
   <!-- ─── SECTION 1: PHILOSOPHY ──────────────────────────── -->
@@ -267,10 +269,11 @@
     </div>
 
     <!-- A1: Deep Analytics Dashboard -->
-    <div class="card" id="deep-analytics">
+    <div class="card card-shipped" id="deep-analytics">
       <h3>
         <span class="badge badge-p0">P0</span>
         <span class="badge badge-analytics">Analytics</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Deep Analytics Dashboard
       </h3>
       <p>Transform the current analytics page from a summary view into an interactive data exploration tool. Users can filter by date range, module, question type, and session — then see trend lines, distribution histograms, and comparative charts that update in real time.</p>
@@ -297,10 +300,11 @@
     </div>
 
     <!-- A3: Readiness Score -->
-    <div class="card" id="readiness-score">
+    <div class="card card-shipped" id="readiness-score">
       <h3>
         <span class="badge badge-p0">P0</span>
         <span class="badge badge-analytics">Analytics</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Readiness Score (True Band Estimate)
       </h3>
       <p>A calculated metric that estimates the user's "real" band by factoring in un-attempted question types (weighted by official exam frequency), consistency, recent trend direction, and data sufficiency. Displayed as a secondary metric below the user's tracked band average. Types with fewer than 3 data points show as "insufficient data" rather than zero.</p>
@@ -312,10 +316,11 @@
     </div>
 
     <!-- A4: Global Search / Cmd+K -->
-    <div class="card" id="global-search">
+    <div class="card card-shipped" id="global-search">
       <h3>
         <span class="badge badge-p1">P1</span>
         <span class="badge badge-ux">UX</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Global Search / Cmd+K
       </h3>
       <p>A spotlight-style search palette (Cmd+K / Ctrl+K) that searches across all data: vocab entries, grammar notes, session logs, topics, settings. Results grouped by type with keyboard navigation. Also serves as a quick-action launcher: "Add vocab," "Log listening session," "Go to analytics."</p>
@@ -327,10 +332,11 @@
     </div>
 
     <!-- A5: Confidence Trend Lines -->
-    <div class="card" id="confidence-trends">
+    <div class="card card-shipped" id="confidence-trends">
       <h3>
         <span class="badge badge-p1">P1</span>
         <span class="badge badge-analytics">Analytics</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Confidence Trend Lines
       </h3>
       <p>Per-question-type trend lines showing accuracy over time with a smoothed moving average. Visible on both the analytics page and individual module pages. Color-coded: improving (green slope), stagnating (yellow flat), declining (red slope). Helps users see if their practice is actually working.</p>
@@ -355,10 +361,11 @@
     </div>
 
     <!-- B1: Resource Library -->
-    <div class="card" id="resource-library">
+    <div class="card card-shipped" id="resource-library">
       <h3>
         <span class="badge badge-p0">P0</span>
         <span class="badge badge-hub">Hub</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Resource Library
       </h3>
       <p>A DB-backed, taggable collection where users save links to practice tests, YouTube channels, podcasts, articles, and study materials — organized by module, difficulty, and custom tags. Each resource shows a usage counter, personal rating, and notes. Bulk-add via paste. Admin can seed curated starter resources.</p>
@@ -370,10 +377,11 @@
     </div>
 
     <!-- B2: Calendar Planner -->
-    <div class="card" id="calendar-planner">
+    <div class="card card-shipped" id="calendar-planner">
       <h3>
         <span class="badge badge-p1">P1</span>
         <span class="badge badge-hub">Hub</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Calendar Planner
       </h3>
       <p>A weekly study planner where users block out study sessions, assign modules/topics, and track completion. MVP: weekly grid view with checkboxes per slot. Phase 2: month view. Phase 3: AI-suggested study plan based on weaknesses and exam date. Integrates with the streak system.</p>
@@ -385,10 +393,11 @@
     </div>
 
     <!-- B3: Exam Quarter Integration -->
-    <div class="card" id="exam-quarter">
+    <div class="card card-shipped" id="exam-quarter">
       <h3>
         <span class="badge badge-p1">P1</span>
         <span class="badge badge-content">Content</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Exam Quarter Awareness
       </h3>
       <p>Ambient awareness of the current IELTS exam cycle: which speaking topics are "in season" (current quarter forecast), countdown to the user's exam date, and study urgency indicators. The forecast data already exists in the DB (seed-forecast-q2-2026.sql) — this surfaces it prominently in the dashboard and speaking module.</p>
@@ -400,10 +409,11 @@
     </div>
 
     <!-- B4: Question Type Wiki -->
-    <div class="card" id="type-wiki">
+    <div class="card card-shipped" id="type-wiki">
       <h3>
         <span class="badge badge-p2">P2</span>
         <span class="badge badge-content">Content</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Question Type Wiki
       </h3>
       <p>A built-in reference for each of the 41 tracked question types: what it looks like, common traps, strategies, official frequency, and links to the user's own performance data for that type. Editable — users can add their own notes per type. Serves as a quick-reference during practice.</p>
@@ -415,10 +425,11 @@
     </div>
 
     <!-- B5: Cross-Module Linking -->
-    <div class="card" id="cross-module">
+    <div class="card card-shipped" id="cross-module">
       <h3>
         <span class="badge badge-p2">P2</span>
         <span class="badge badge-hub">Hub</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Cross-Module Linking
       </h3>
       <p>Connect data across modules: link a vocab entry to a writing essay where it was used, link a grammar rule to listening errors it caused, link a speaking topic to relevant reading passages. Bi-directional — view related items from either side. Think wiki-style [[backlinks]].</p>
@@ -430,10 +441,11 @@
     </div>
 
     <!-- B6: Weekly Digest -->
-    <div class="card" id="weekly-digest">
+    <div class="card card-shipped" id="weekly-digest">
       <h3>
         <span class="badge badge-p2">P2</span>
         <span class="badge badge-analytics">Analytics</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Weekly Study Digest
       </h3>
       <p>An auto-generated weekly summary: total study time, sessions completed, band movement, streak status, top-improved type, weakest type, and one suggested focus for next week. Displayed as a dismissible card on the dashboard every Monday. Optionally emailable.</p>
@@ -458,10 +470,11 @@
     </div>
 
     <!-- C1: Mistake Journal -->
-    <div class="card" id="mistake-journal">
+    <div class="card card-shipped" id="mistake-journal">
       <h3>
         <span class="badge badge-p1">P1</span>
         <span class="badge badge-hub">Hub</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Mistake Journal
       </h3>
       <p>A dedicated section to log, categorize, and review mistakes across all modules. Each entry captures: what the mistake was, why it happened (carelessness, knowledge gap, time pressure), the correct approach, and which question type it occurred in. Supports tagging, filtering, and spaced-repetition-style review of past mistakes.</p>
@@ -473,10 +486,11 @@
     </div>
 
     <!-- C2: Study Timer -->
-    <div class="card" id="study-timer">
+    <div class="card card-shipped" id="study-timer">
       <h3>
         <span class="badge badge-p2">P2</span>
         <span class="badge badge-ux">UX</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Study Timer / Pomodoro
       </h3>
       <p>Built-in study timer with Pomodoro mode (25/5 or custom intervals). Auto-logs study time to the relevant module. Persists across page navigation. Shows in a floating mini-widget or status bar. Integrates with daily activity tracking and streak calculations.</p>
@@ -488,10 +502,11 @@
     </div>
 
     <!-- C3: Writing & Speaking Heatmaps -->
-    <div class="card" id="ws-heatmaps">
+    <div class="card card-shipped" id="ws-heatmaps">
       <h3>
         <span class="badge badge-p2">P2</span>
         <span class="badge badge-analytics">Analytics</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Writing &amp; Speaking Heatmaps
       </h3>
       <p>Extend the existing heatmap visualization (currently Listening + Reading only) to cover Writing and Speaking. Writing: heatmap by task type (Task 1 types: line graph, bar chart, pie, table, map, process, mixed; Task 2: opinion, discussion, problem-solution, two-part, advantage-disadvantage). Speaking: heatmap by Part 1/2/3 topic categories.</p>
@@ -503,10 +518,11 @@
     </div>
 
     <!-- C4: Batch Import -->
-    <div class="card" id="batch-import">
+    <div class="card card-shipped" id="batch-import">
       <h3>
         <span class="badge badge-p2">P2</span>
         <span class="badge badge-core">Core</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Batch Import
       </h3>
       <p>Import data from CSV/spreadsheets: past test scores, vocab lists, grammar notes. Supports mapping columns to fields. Validates data before import. Essential for users migrating from spreadsheets or other tools. Also enables bulk-add of vocab (paste a list of words).</p>
@@ -518,10 +534,11 @@
     </div>
 
     <!-- C5: Tutor / Shared View -->
-    <div class="card" id="tutor-view">
+    <div class="card card-shipped" id="tutor-view">
       <h3>
         <span class="badge badge-p2">P2</span>
         <span class="badge badge-social">Social</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Tutor / Shared View
       </h3>
       <p>Generate a read-only shareable link to the user's analytics and progress. Tutors can see the student's heatmap, trend lines, mistake patterns, and practice frequency without needing an account. Time-limited link (expires after 7 days by default). No editing access.</p>
@@ -533,10 +550,11 @@
     </div>
 
     <!-- C6: Speaking Recorder -->
-    <div class="card" id="speaking-recorder">
+    <div class="card card-shipped" id="speaking-recorder">
       <h3>
         <span class="badge badge-p2">P2</span>
         <span class="badge badge-ai">AI</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Speaking Recorder &amp; Self-Review
       </h3>
       <p>Record speaking practice directly in the hub, then replay and self-annotate: mark hesitations, fillers, pronunciation issues, and good moments. AI provides optional fluency metrics (words per minute, filler count, pause length). Saved recordings linked to topic and date. Framing: "Record and analyze YOUR speaking" — a journaling tool, not a test simulator.</p>
@@ -548,10 +566,11 @@
     </div>
 
     <!-- C7: Export to PDF -->
-    <div class="card" id="export-pdf">
+    <div class="card card-shipped" id="export-pdf">
       <h3>
         <span class="badge badge-p2">P2</span>
         <span class="badge badge-core">Core</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Export to PDF
       </h3>
       <p>Generate a polished PDF report of the user's progress: overall bands, module breakdowns, heatmaps, trend charts, streak data, and key recommendations. Useful for visa applications (proof of IELTS preparation), tutor meetings, and personal records. Customizable: choose which sections to include.</p>
@@ -576,10 +595,11 @@
     </div>
 
     <!-- D1: Goal-Setting Engine -->
-    <div class="card" id="goal-engine">
+    <div class="card card-shipped" id="goal-engine">
       <h3>
         <span class="badge badge-p2">P2</span>
         <span class="badge badge-hub">Hub</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Goal-Setting Engine
       </h3>
       <p>Users set target bands per module and a target exam date. The system calculates required improvement rate, shows a progress-to-goal gauge, and warns if the user is falling behind pace. Goals are visible on the dashboard and influence the recommendation engine's urgency factor.</p>
@@ -587,10 +607,11 @@
     </div>
 
     <!-- D2: Rich-Text Notes -->
-    <div class="card" id="rich-notes">
+    <div class="card card-shipped" id="rich-notes">
       <h3>
         <span class="badge badge-p2">P2</span>
         <span class="badge badge-hub">Hub</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Rich-Text Notes (Mini Notion)
       </h3>
       <p>Upgrade text fields across the app from plain text to a lightweight rich-text editor: bold, italic, bullet lists, headings, code blocks, and inline images. Most impactful in vocab definitions, grammar notes, essay drafts, and the mistake journal. Not a full Notion clone — just enough formatting to make notes useful.</p>
@@ -598,10 +619,11 @@
     </div>
 
     <!-- D3: Smart Notifications -->
-    <div class="card" id="notifications">
+    <div class="card card-shipped" id="notifications">
       <h3>
         <span class="badge badge-p3">P3</span>
         <span class="badge badge-ux">UX</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Smart Notifications
       </h3>
       <p>In-app and optional push notifications: spaced repetition reminders, streak danger alerts, weekly digest nudges, exam date countdowns, and "you haven't practiced [module] in X days" prompts. Configurable — users choose which notifications to receive and when.</p>
@@ -609,10 +631,11 @@
     </div>
 
     <!-- D4: Achievement Sharing -->
-    <div class="card" id="achievement-sharing">
+    <div class="card card-shipped" id="achievement-sharing">
       <h3>
         <span class="badge badge-p3">P3</span>
         <span class="badge badge-social">Social</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Achievement Sharing
       </h3>
       <p>Generate shareable cards (images) for milestones: new band achieved, streak record, badge earned, level up. Designed for Instagram Stories, Twitter, and study group chats. Branded with IELTS Hub watermark. One-click share from the achievement modal.</p>
@@ -620,10 +643,11 @@
     </div>
 
     <!-- D5: Dashboard Toggles -->
-    <div class="card" id="dashboard-toggles">
+    <div class="card card-shipped" id="dashboard-toggles">
       <h3>
         <span class="badge badge-p2">P2</span>
         <span class="badge badge-ux">UX</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Dashboard Toggles / Layout Control
       </h3>
       <p>Let users show/hide dashboard widgets and rearrange their order. Some users want dense data; others want a clean overview. Persist layout preferences per user. MVP: toggle visibility of each widget card. Future: drag-and-drop reordering.</p>
@@ -631,10 +655,11 @@
     </div>
 
     <!-- D6: Multi-Source View -->
-    <div class="card" id="multi-source">
+    <div class="card card-shipped" id="multi-source">
       <h3>
         <span class="badge badge-p3">P3</span>
         <span class="badge badge-hub">Hub</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Multi-Source Aggregation View
       </h3>
       <p>A unified "recent activity" feed that combines data from all modules: last 3 listening sessions + 2 vocab entries + 1 writing draft + today's grammar review. Single scrollable timeline. Filter by module or date. Think GitHub activity feed but for IELTS study.</p>
@@ -642,10 +667,11 @@
     </div>
 
     <!-- D7: Focus Mode -->
-    <div class="card" id="focus-mode">
+    <div class="card card-shipped" id="focus-mode">
       <h3>
         <span class="badge badge-p3">P3</span>
         <span class="badge badge-ux">UX</span>
+        <span class="badge badge-shipped">&#10003; Shipped</span>
         Focus Mode
       </h3>
       <p>A distraction-free mode that hides the sidebar, nav, and all non-essential UI — leaving only the current task (writing an essay, reviewing vocab, logging scores). Activated via keyboard shortcut or toggle. Pairs well with the study timer.</p>
@@ -729,31 +755,31 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>1</td><td>Deep Analytics Dashboard</td><td>A</td><td><span class="badge badge-p0">P0</span></td><td>&#9733;&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-analytics">Analytics</span></td></tr>
+          <tr><td>1</td><td>Deep Analytics Dashboard <span class="badge badge-shipped">&#10003; Shipped</span></td><td>A</td><td><span class="badge badge-p0">P0</span></td><td>&#9733;&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-analytics">Analytics</span></td></tr>
           <tr><td>2</td><td>Inline Editing Everywhere</td><td>A</td><td><span class="badge badge-p0">P0</span></td><td>&#9733;&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
-          <tr><td>3</td><td>Readiness Score</td><td>A</td><td><span class="badge badge-p0">P0</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;</td><td><span class="badge badge-analytics">Analytics</span></td></tr>
-          <tr><td>4</td><td>Resource Library</td><td>B</td><td><span class="badge badge-p0">P0</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
-          <tr><td>5</td><td>Global Search / Cmd+K</td><td>A</td><td><span class="badge badge-p1">P1</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
-          <tr><td>6</td><td>Confidence Trend Lines</td><td>A</td><td><span class="badge badge-p1">P1</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;</td><td><span class="badge badge-analytics">Analytics</span></td></tr>
-          <tr><td>7</td><td>Calendar Planner</td><td>B</td><td><span class="badge badge-p1">P1</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
-          <tr><td>8</td><td>Exam Quarter Awareness</td><td>B</td><td><span class="badge badge-p1">P1</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9734;</td><td><span class="badge badge-content">Content</span></td></tr>
-          <tr><td>9</td><td>Mistake Journal</td><td>C</td><td><span class="badge badge-p1">P1</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
-          <tr><td>10</td><td>Question Type Wiki</td><td>B</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-content">Content</span></td></tr>
-          <tr><td>11</td><td>Cross-Module Linking</td><td>B</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
-          <tr><td>12</td><td>Weekly Study Digest</td><td>B</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;</td><td><span class="badge badge-analytics">Analytics</span></td></tr>
-          <tr><td>13</td><td>Study Timer / Pomodoro</td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
-          <tr><td>14</td><td>Writing &amp; Speaking Heatmaps</td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-analytics">Analytics</span></td></tr>
-          <tr><td>15</td><td>Batch Import</td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-core">Core</span></td></tr>
-          <tr><td>16</td><td>Tutor / Shared View</td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-social">Social</span></td></tr>
-          <tr><td>17</td><td>Speaking Recorder</td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;&#9733;</td><td><span class="badge badge-ai">AI</span></td></tr>
-          <tr><td>18</td><td>Export to PDF</td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-core">Core</span></td></tr>
-          <tr><td>19</td><td>Goal-Setting Engine</td><td>D</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
-          <tr><td>20</td><td>Rich-Text Notes</td><td>D</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
-          <tr><td>21</td><td>Dashboard Toggles</td><td>D</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
-          <tr><td>22</td><td>Smart Notifications</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
-          <tr><td>23</td><td>Achievement Sharing</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;</td><td><span class="badge badge-social">Social</span></td></tr>
-          <tr><td>24</td><td>Multi-Source View</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
-          <tr><td>25</td><td>Focus Mode</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9734;</td><td>&#9733;&#9734;</td><td><span class="badge badge-ux">UX</span></td></tr>
+          <tr><td>3</td><td>Readiness Score <span class="badge badge-shipped">&#10003; Shipped</span></td><td>A</td><td><span class="badge badge-p0">P0</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;</td><td><span class="badge badge-analytics">Analytics</span></td></tr>
+          <tr><td>4</td><td>Resource Library <span class="badge badge-shipped">&#10003; Shipped</span></td><td>B</td><td><span class="badge badge-p0">P0</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
+          <tr><td>5</td><td>Global Search / Cmd+K <span class="badge badge-shipped">&#10003; Shipped</span></td><td>A</td><td><span class="badge badge-p1">P1</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
+          <tr><td>6</td><td>Confidence Trend Lines <span class="badge badge-shipped">&#10003; Shipped</span></td><td>A</td><td><span class="badge badge-p1">P1</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;</td><td><span class="badge badge-analytics">Analytics</span></td></tr>
+          <tr><td>7</td><td>Calendar Planner <span class="badge badge-shipped">&#10003; Shipped</span></td><td>B</td><td><span class="badge badge-p1">P1</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
+          <tr><td>8</td><td>Exam Quarter Awareness <span class="badge badge-shipped">&#10003; Shipped</span></td><td>B</td><td><span class="badge badge-p1">P1</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9734;</td><td><span class="badge badge-content">Content</span></td></tr>
+          <tr><td>9</td><td>Mistake Journal <span class="badge badge-shipped">&#10003; Shipped</span></td><td>C</td><td><span class="badge badge-p1">P1</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
+          <tr><td>10</td><td>Question Type Wiki <span class="badge badge-shipped">&#10003; Shipped</span></td><td>B</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-content">Content</span></td></tr>
+          <tr><td>11</td><td>Cross-Module Linking <span class="badge badge-shipped">&#10003; Shipped</span></td><td>B</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
+          <tr><td>12</td><td>Weekly Study Digest <span class="badge badge-shipped">&#10003; Shipped</span></td><td>B</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;</td><td><span class="badge badge-analytics">Analytics</span></td></tr>
+          <tr><td>13</td><td>Study Timer / Pomodoro <span class="badge badge-shipped">&#10003; Shipped</span></td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
+          <tr><td>14</td><td>Writing &amp; Speaking Heatmaps <span class="badge badge-shipped">&#10003; Shipped</span></td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-analytics">Analytics</span></td></tr>
+          <tr><td>15</td><td>Batch Import <span class="badge badge-shipped">&#10003; Shipped</span></td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-core">Core</span></td></tr>
+          <tr><td>16</td><td>Tutor / Shared View <span class="badge badge-shipped">&#10003; Shipped</span></td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-social">Social</span></td></tr>
+          <tr><td>17</td><td>Speaking Recorder <span class="badge badge-shipped">&#10003; Shipped</span></td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;&#9733;</td><td><span class="badge badge-ai">AI</span></td></tr>
+          <tr><td>18</td><td>Export to PDF <span class="badge badge-shipped">&#10003; Shipped</span></td><td>C</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-core">Core</span></td></tr>
+          <tr><td>19</td><td>Goal-Setting Engine <span class="badge badge-shipped">&#10003; Shipped</span></td><td>D</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
+          <tr><td>20</td><td>Rich-Text Notes <span class="badge badge-shipped">&#10003; Shipped</span></td><td>D</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
+          <tr><td>21</td><td>Dashboard Toggles <span class="badge badge-shipped">&#10003; Shipped</span></td><td>D</td><td><span class="badge badge-p2">P2</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
+          <tr><td>22</td><td>Smart Notifications <span class="badge badge-shipped">&#10003; Shipped</span></td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
+          <tr><td>23</td><td>Achievement Sharing <span class="badge badge-shipped">&#10003; Shipped</span></td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9734;</td><td>&#9733;&#9733;</td><td><span class="badge badge-social">Social</span></td></tr>
+          <tr><td>24</td><td>Multi-Source View <span class="badge badge-shipped">&#10003; Shipped</span></td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
+          <tr><td>25</td><td>Focus Mode <span class="badge badge-shipped">&#10003; Shipped</span></td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9734;</td><td>&#9733;&#9734;</td><td><span class="badge badge-ux">UX</span></td></tr>
           <tr><td>26</td><td>Customizable Widgets</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;&#9733;</td><td><span class="badge badge-ux">UX</span></td></tr>
           <tr><td>27</td><td>Multi-Exam Support</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;&#9733;</td><td><span class="badge badge-hub">Hub</span></td></tr>
           <tr><td>28</td><td>Offline-First PWA</td><td>D</td><td><span class="badge badge-p3">P3</span></td><td>&#9733;&#9733;&#9733;&#9733;</td><td>&#9733;&#9733;&#9733;&#9733;&#9733;</td><td><span class="badge badge-core">Core</span></td></tr>

@@ -2,6 +2,61 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { getLevel } from "@/lib/constants/gamification";
+
+export type AchievementCardData = {
+  display_name: string;
+  current_est_band: number | null;
+  current_streak: number;
+  total_xp: number;
+  level: number;
+  level_title: string;
+  listening_avg: number | null;
+  reading_avg: number | null;
+  writing_avg: number | null;
+  speaking_avg: number | null;
+};
+
+export async function getAchievementCardData(): Promise<AchievementCardData | null> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const [profile, listening, reading, writing, speaking] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("display_name, current_est_band, current_streak, total_xp")
+      .eq("id", user.id)
+      .single(),
+    supabase.from("listening_records").select("estimated_band").eq("user_id", user.id),
+    supabase.from("reading_records").select("estimated_band").eq("user_id", user.id),
+    supabase.from("writing_entries").select("estimated_band").eq("user_id", user.id),
+    supabase.from("speaking_entries").select("estimated_band").eq("user_id", user.id),
+  ]);
+
+  function avg(rows: { estimated_band: number | null }[] | null): number | null {
+    const valid = rows?.filter((r) => r.estimated_band !== null) ?? [];
+    if (valid.length === 0) return null;
+    const sum = valid.reduce((s, r) => s + (r.estimated_band ?? 0), 0);
+    return Math.round((sum / valid.length) * 2) / 2;
+  }
+
+  const xp = profile.data?.total_xp ?? 0;
+  const { level, title } = getLevel(xp);
+
+  return {
+    display_name: profile.data?.display_name ?? "Student",
+    current_est_band: profile.data?.current_est_band ?? null,
+    current_streak: profile.data?.current_streak ?? 0,
+    total_xp: xp,
+    level,
+    level_title: title,
+    listening_avg: avg(listening.data),
+    reading_avg: avg(reading.data),
+    writing_avg: avg(writing.data),
+    speaking_avg: avg(speaking.data),
+  };
+}
 
 export type ShareLink = {
   id: string;
