@@ -146,7 +146,7 @@ export async function getListeningRecords() {
 
   const { data, error } = await supabase
     .from("listening_records")
-    .select("*")
+    .select("id, date, test_name, total_score, estimated_band, source, self_rating")
     .eq("user_id", user.id)
     .order("date", { ascending: false });
 

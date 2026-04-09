@@ -118,7 +118,7 @@ export async function getWritingEntries() {
 
   const { data, error } = await supabase
     .from("writing_entries")
-    .select("*")
+    .select("id, date, task_type, sub_type, topic, estimated_band, word_count")
     .eq("user_id", user.id)
     .order("date", { ascending: false });
 

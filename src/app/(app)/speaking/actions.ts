@@ -132,7 +132,7 @@ export async function getSpeakingEntries() {
 
   const { data, error } = await supabase
     .from("speaking_entries")
-    .select("*")
+    .select("id, date, type, estimated_band, fluency_score, lexical_score, grammar_score, pronunciation_score")
     .eq("user_id", user.id)
     .order("date", { ascending: false });
 
