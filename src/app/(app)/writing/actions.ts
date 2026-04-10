@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { updateStreak } from "@/lib/streak";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import type { TeacherFeedback } from "@/lib/types";
 
 export type CreateWritingEntryInput = {
   date: string;
@@ -19,6 +20,7 @@ export type CreateWritingEntryInput = {
   lr_score: number;
   gra_score: number;
   feedback: string;
+  teacher_feedback?: TeacherFeedback;
 };
 
 function roundToHalf(value: number): number {
@@ -56,6 +58,7 @@ export async function createWritingEntry(input: CreateWritingEntryInput) {
       lr_score: input.lr_score,
       gra_score: input.gra_score,
       feedback: input.feedback || null,
+      teacher_feedback: input.teacher_feedback ?? null,
     })
     .select("id")
     .single();

@@ -10,6 +10,8 @@ import { RichEditField } from "@/components/ui/rich-edit-field";
 import { getRelatedRecords } from "@/app/(app)/record-links-actions";
 import { RelatedRecords } from "@/components/record-links/related-records";
 import { AiGradeWriting } from "@/components/ai/ai-grade-writing";
+import { TeacherFeedbackPanel } from "@/components/writing/teacher-feedback-panel";
+import type { TeacherFeedback } from "@/lib/types";
 
 function bandToColor(band: number): string {
   if (band >= 8) return "#22c55e";
@@ -192,6 +194,11 @@ export default async function WritingDetailPage({
           minHeight="100px"
         />
       </div>
+
+      {/* AI Teacher Feedback */}
+      {entry.teacher_feedback && (
+        <TeacherFeedbackPanel feedback={entry.teacher_feedback as unknown as TeacherFeedback} />
+      )}
 
       {/* AI Grade */}
       <AiGradeWriting entryId={entry.id} />

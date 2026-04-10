@@ -107,6 +107,14 @@ export type ReadingTypeResult = {
 };
 
 // ── Writing Module ──
+export interface TeacherFeedback {
+  logic: string;
+  structure: string;
+  grammar: string;
+  vocab: string;
+  enhancement: string;
+}
+
 export type WritingEntry = {
   id: string;
   user_id: string;
@@ -125,6 +133,7 @@ export type WritingEntry = {
   lr_score: number | null;
   gra_score: number | null;
   feedback: string | null;
+  teacher_feedback?: TeacherFeedback | null;
   created_at: string;
 };
 

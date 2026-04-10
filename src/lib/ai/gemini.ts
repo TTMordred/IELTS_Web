@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import type { TeacherFeedback } from "@/lib/types";
 
 const DEFAULT_MODEL = "gemini-2.5-flash";
 const MAX_INPUT_LENGTH = 5000;
@@ -50,30 +51,41 @@ export async function gradeWritingEssay(input: {
   feedback: string;
   strengths: string[];
   improvements: string[];
+  teacherFeedback: TeacherFeedback;
 }> {
   const model = getClient().getGenerativeModel({ model: input.model ?? DEFAULT_MODEL });
 
-  const prompt = `You are a senior IELTS examiner. Grade this IELTS ${input.taskType === "task1" ? "Task 1" : "Task 2"} essay.
+  const taskLabel = input.taskType === "task1" ? "Task 1" : "Task 2";
+  const prompt = `You are a senior IELTS examiner and experienced writing coach. Grade this IELTS ${taskLabel} essay and provide detailed teacher-quality feedback in Vietnamese.
 
-Type: ${input.subType}
-Question: ${input.questionText}
+Essay type: ${input.subType}
+Question: ${input.questionText || "(not provided)"}
 
 Essay:
 ${input.essayContent}
 
-Evaluate against official IELTS band descriptors and return ONLY valid JSON (no markdown):
+Score against official IELTS band descriptors. Then write teacher feedback referencing specific parts of the essay — not generic advice.
+
+Return ONLY valid JSON (no markdown, no code blocks, no nested braces inside string values):
 {
-  "ta": <1-9 Task Achievement score>,
-  "cc": <1-9 Coherence & Cohesion score>,
-  "lr": <1-9 Lexical Resource score>,
-  "gra": <1-9 Grammatical Range & Accuracy score>,
+  "ta": <integer 1-9, Task Achievement>,
+  "cc": <integer 1-9, Coherence and Cohesion>,
+  "lr": <integer 1-9, Lexical Resource>,
+  "gra": <integer 1-9, Grammatical Range and Accuracy>,
   "overallBand": <average of 4 scores rounded to nearest 0.5>,
-  "feedback": "<2-3 sentence overall assessment in Vietnamese>",
-  "strengths": ["<strength 1>", "<strength 2>"],
-  "improvements": ["<area to improve 1>", "<area to improve 2>", "<area to improve 3>"]
+  "feedback": "<2-3 câu tổng quan bằng tiếng Việt>",
+  "strengths": ["<điểm mạnh 1>", "<điểm mạnh 2>"],
+  "improvements": ["<cần cải thiện 1>", "<cần cải thiện 2>", "<cần cải thiện 3>"],
+  "teacherFeedback": {
+    "logic": "<2-4 câu phân tích tư duy và lập luận: luận điểm có rõ ràng không, có được phát triển tốt không, ví dụ có thuyết phục không, dẫn chứng có liên quan không>",
+    "structure": "<2-4 câu phân tích cấu trúc: intro/body/conclusion có cân đối không, topic sentences có rõ không, các đoạn có liên kết tốt không, cohesive devices dùng có hiệu quả không>",
+    "grammar": "<2-4 câu phân tích ngữ pháp: nêu cụ thể 1-2 lỗi sai điển hình từ bài, loại lỗi hay gặp, mức độ ảnh hưởng đến band score>",
+    "vocab": "<2-4 câu phân tích từ vựng: range có phong phú không, có dùng từ chính xác không, có bị lặp từ không, gợi ý 1-2 từ/cụm từ tốt hơn cụ thể>",
+    "enhancement": "<2-4 câu gợi ý cải thiện cụ thể và có thể thực hiện ngay để tăng band score>"
+  }
 }
 
-Be accurate and constructive. Score fairly — most students are band 5.0-7.0.`;
+Score fairly — most IELTS students are band 5.0-7.0. Do not inflate scores.`;
 
   if (input.essayContent.length > MAX_INPUT_LENGTH) {
     throw new Error("Essay too long for AI grading (max 5000 chars)");
@@ -83,6 +95,7 @@ Be accurate and constructive. Score fairly — most students are band 5.0-7.0.`;
   const text = result.response.text();
   const raw = parseAIJson(text);
 
+  const rawTF = (raw.teacherFeedback ?? {}) as Record<string, unknown>;
   return {
     ta: clampScore(raw.ta),
     cc: clampScore(raw.cc),
@@ -92,6 +105,13 @@ Be accurate and constructive. Score fairly — most students are band 5.0-7.0.`;
     feedback: typeof raw.feedback === "string" ? raw.feedback : "",
     strengths: safeStringArray(raw.strengths),
     improvements: safeStringArray(raw.improvements),
+    teacherFeedback: {
+      logic: typeof rawTF.logic === "string" ? rawTF.logic : "",
+      structure: typeof rawTF.structure === "string" ? rawTF.structure : "",
+      grammar: typeof rawTF.grammar === "string" ? rawTF.grammar : "",
+      vocab: typeof rawTF.vocab === "string" ? rawTF.vocab : "",
+      enhancement: typeof rawTF.enhancement === "string" ? rawTF.enhancement : "",
+    },
   };
 }
 

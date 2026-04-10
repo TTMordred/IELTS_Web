@@ -13,6 +13,8 @@ import {
 } from "@/lib/constants/writing-types";
 import { createWritingEntry } from "../actions";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { TeacherFeedbackPanel } from "@/components/writing/teacher-feedback-panel";
+import type { TeacherFeedback } from "@/lib/types";
 
 function countWords(html: string): number {
   const plain = html.replace(/<[^>]*>/g, " ");
@@ -47,6 +49,7 @@ export default function NewWritingEntryPage() {
   const [aiGrading, setAiGrading] = useState(false);
   const [aiGraded, setAiGraded] = useState(false);
   const [aiGradeError, setAiGradeError] = useState<string | null>(null);
+  const [teacherFeedback, setTeacherFeedback] = useState<TeacherFeedback | null>(null);
 
   const wordCount = countWords(essayContent);
   const estimatedBand = roundToHalf((taScore + ccScore + lrScore + graScore) / 4);
@@ -82,6 +85,7 @@ export default function NewWritingEntryPage() {
       setLrScore(result.lr ?? 6);
       setGraScore(result.gra ?? 6);
       if (result.feedback) setFeedback(result.feedback);
+      setTeacherFeedback(result.teacherFeedback ?? null);
       setAiGraded(true);
     } catch (err) {
       setAiGradeError(err instanceof Error ? err.message : "AI grading failed");
@@ -108,10 +112,15 @@ export default function NewWritingEntryPage() {
         lr_score: lrScore,
         gra_score: graScore,
         feedback,
+        teacher_feedback: teacherFeedback ?? undefined,
       });
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to save");
-      setLoading(false);
+      if (err instanceof Error) {
+        setError(err.message || "Failed to save");
+        setLoading(false);
+      }
+      // re-throw NEXT_REDIRECT (not an Error instance) so navigation proceeds
+      throw err;
     }
   }
 
@@ -402,6 +411,10 @@ export default function NewWritingEntryPage() {
               />
             </div>
           </div>
+
+          {teacherFeedback && (
+            <TeacherFeedbackPanel feedback={teacherFeedback} />
+          )}
 
           <div className="flex justify-between">
             <Button onClick={() => setStep(1)} variant="secondary">
