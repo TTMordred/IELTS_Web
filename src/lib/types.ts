@@ -195,7 +195,7 @@ export type WritingEntry = {
   lr_score: number | null;
   gra_score: number | null;
   feedback: string | null;
-  teacher_feedback?: TeacherFeedback | null;
+  teacher_feedback?: TeacherFeedback | RichTeacherFeedback | null;
   created_at: string;
 };
 

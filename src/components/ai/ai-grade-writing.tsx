@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Sparkles, Loader2 } from "lucide-react";
 import { saveAiGrading } from "@/app/(app)/writing/actions";
 import type { RichTeacherFeedback } from "@/lib/types";
@@ -33,6 +34,7 @@ const CRITERIA: { key: "ta" | "cc" | "lr" | "gra"; label: string; name: string }
 ];
 
 export function AiGradeWriting({ entryId }: { entryId: string }) {
+  const router = useRouter();
   const [result, setResult] = useState<GradeResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,8 +81,8 @@ export function AiGradeWriting({ entryId }: { entryId: string }) {
             data.teacherFeedback
           );
           setSaved(true);
-          // Reload to show updated TeacherFeedbackPanel
-          window.location.reload();
+          // Soft-refresh server components to show updated TeacherFeedbackPanel
+          router.refresh();
         } catch {
           // Non-critical — grading display still works from local state
           setSaveError("Could not save to database");
