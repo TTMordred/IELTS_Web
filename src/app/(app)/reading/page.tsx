@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { getReadingRecords } from "./actions";
+import { getReadingRecords, deleteReadingRecord } from "./actions";
 import { Badge } from "@/components/ui/badge";
+import { DeleteRecordButton } from "@/components/ui/delete-record-button";
 import { bandToColor } from "@/lib/constants/band-tables";
 import { BookOpen, Plus } from "lucide-react";
 
@@ -46,26 +47,27 @@ export default async function ReadingPage() {
       ) : (
         <div className="space-y-3">
           {records.map((record) => (
-            <Link
-              key={record.id}
-              href={`/reading/${record.id}`}
-              className="card-interactive flex items-center gap-4 p-4"
-            >
-              <div
-                className="w-12 h-12 rounded-lg flex items-center justify-center font-mono font-bold text-white text-sm shrink-0"
-                style={{ backgroundColor: bandToColor(record.estimated_band || 0) }}
+            <div key={record.id} className="card-interactive flex items-center gap-4 p-4">
+              <Link
+                href={`/reading/${record.id}`}
+                className="flex items-center gap-4 flex-1 min-w-0"
               >
-                {record.estimated_band?.toFixed(1) || "—"}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-[var(--color-ink)] truncate">
-                  {record.test_name || "Untitled Test"}
-                </p>
-                <p className="text-sm text-[var(--color-ink-muted)]">
-                  {record.date} &middot; {record.total_score}/40
-                  {record.total_time_min && ` \u00b7 ${record.total_time_min} min`}
-                </p>
-              </div>
+                <div
+                  className="w-12 h-12 rounded-lg flex items-center justify-center font-mono font-bold text-white text-sm shrink-0"
+                  style={{ backgroundColor: bandToColor(record.estimated_band || 0) }}
+                >
+                  {record.estimated_band?.toFixed(1) || "—"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-[var(--color-ink)] truncate">
+                    {record.test_name || "Untitled Test"}
+                  </p>
+                  <p className="text-sm text-[var(--color-ink-muted)]">
+                    {record.date} &middot; {record.total_score}/40
+                    {record.total_time_min && ` · ${record.total_time_min} min`}
+                  </p>
+                </div>
+              </Link>
               <div className="flex items-center gap-2 shrink-0">
                 <Badge variant={record.source === "cambridge" ? "info" : "default"}>
                   {record.source}
@@ -75,8 +77,9 @@ export default async function ReadingPage() {
                     {"★".repeat(record.self_rating)}
                   </span>
                 )}
+                <DeleteRecordButton id={record.id} deleteAction={deleteReadingRecord} label="record" />
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}

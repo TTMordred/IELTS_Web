@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { getWritingEntries } from "./actions";
+import { getWritingEntries, deleteWritingEntry } from "./actions";
 import { Badge } from "@/components/ui/badge";
+import { DeleteRecordButton } from "@/components/ui/delete-record-button";
 import { PenTool, Plus } from "lucide-react";
 
 function bandToColor(band: number): string {
@@ -53,25 +54,26 @@ export default async function WritingPage() {
       ) : (
         <div className="space-y-3">
           {entries.map((entry) => (
-            <Link
-              key={entry.id}
-              href={`/writing/${entry.id}`}
-              className="card-interactive flex items-center gap-4 p-4"
-            >
-              <div
-                className="w-12 h-12 rounded-lg flex items-center justify-center font-mono font-bold text-white text-sm shrink-0"
-                style={{ backgroundColor: bandToColor(entry.estimated_band || 0) }}
+            <div key={entry.id} className="card-interactive flex items-center gap-4 p-4">
+              <Link
+                href={`/writing/${entry.id}`}
+                className="flex items-center gap-4 flex-1 min-w-0"
               >
-                {entry.estimated_band?.toFixed(1) || "—"}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-[var(--color-ink)] truncate">
-                  {entry.topic || "Untitled Essay"}
-                </p>
-                <p className="text-sm text-[var(--color-ink-muted)]">
-                  {entry.date} &middot; {entry.word_count ?? 0} words
-                </p>
-              </div>
+                <div
+                  className="w-12 h-12 rounded-lg flex items-center justify-center font-mono font-bold text-white text-sm shrink-0"
+                  style={{ backgroundColor: bandToColor(entry.estimated_band || 0) }}
+                >
+                  {entry.estimated_band?.toFixed(1) || "—"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-[var(--color-ink)] truncate">
+                    {entry.topic || "Untitled Essay"}
+                  </p>
+                  <p className="text-sm text-[var(--color-ink-muted)]">
+                    {entry.date} &middot; {entry.word_count ?? 0} words
+                  </p>
+                </div>
+              </Link>
               <div className="flex items-center gap-2 shrink-0">
                 <Badge variant={entry.task_type === "task1" ? "info" : "default"}>
                   {entry.task_type === "task1" ? "T1" : "T2"}
@@ -81,8 +83,9 @@ export default async function WritingPage() {
                     {entry.sub_type}
                   </span>
                 )}
+                <DeleteRecordButton id={entry.id} deleteAction={deleteWritingEntry} label="entry" />
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}

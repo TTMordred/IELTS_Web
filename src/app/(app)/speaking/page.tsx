@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { getSpeakingEntries } from "./actions";
+import { getSpeakingEntries, deleteSpeakingEntry } from "./actions";
 import { Badge } from "@/components/ui/badge";
+import { DeleteRecordButton } from "@/components/ui/delete-record-button";
 import { bandToColor } from "@/lib/constants/band-tables";
 import { MessageSquare, Plus } from "lucide-react";
-import { SPEAKING_ENTRY_TYPES } from "@/lib/constants/speaking-types";
-import { SPEAKING_CRITERIA } from "@/lib/constants/speaking-types";
+import { SPEAKING_ENTRY_TYPES, SPEAKING_CRITERIA } from "@/lib/constants/speaking-types";
 
 const MODULE_COLOR = "#1D9E75";
 
@@ -65,58 +65,56 @@ export default async function SpeakingPage() {
       ) : (
         <div className="space-y-3">
           {entries.map((entry) => (
-            <Link
-              key={entry.id}
-              href={`/speaking/${entry.id}`}
-              className="card-interactive flex items-center gap-4 p-4"
-            >
-              {/* Band badge */}
-              <div
-                className="w-12 h-12 rounded-lg flex items-center justify-center font-mono font-bold text-white text-sm shrink-0"
-                style={{
-                  backgroundColor: bandToColor(entry.estimated_band || 0),
-                }}
+            <div key={entry.id} className="card-interactive flex items-center gap-4 p-4">
+              <Link
+                href={`/speaking/${entry.id}`}
+                className="flex items-center gap-4 flex-1 min-w-0"
               >
-                {entry.estimated_band?.toFixed(1) || "—"}
-              </div>
+                <div
+                  className="w-12 h-12 rounded-lg flex items-center justify-center font-mono font-bold text-white text-sm shrink-0"
+                  style={{ backgroundColor: bandToColor(entry.estimated_band || 0) }}
+                >
+                  {entry.estimated_band?.toFixed(1) || "—"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-[var(--color-ink)] truncate">
+                    {typeLabel(entry.type)}
+                  </p>
+                  <p className="text-sm text-[var(--color-ink-muted)]">
+                    {entry.date}
+                  </p>
+                </div>
+              </Link>
 
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-[var(--color-ink)] truncate">
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="hidden sm:flex items-center gap-3">
+                  {SPEAKING_CRITERIA.map((c) => {
+                    const score =
+                      c.id === "fluency"
+                        ? entry.fluency_score
+                        : c.id === "lexical"
+                          ? entry.lexical_score
+                          : c.id === "grammar"
+                            ? entry.grammar_score
+                            : entry.pronunciation_score;
+                    return (
+                      <div key={c.id} className="text-center">
+                        <p className="text-[0.65rem] text-[var(--color-ink-muted)] uppercase tracking-wide">
+                          {c.shortName}
+                        </p>
+                        <p className="text-sm font-mono font-semibold text-[var(--color-ink)]">
+                          {score ?? "—"}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+                <Badge variant={typeBadgeVariant(entry.type)}>
                   {typeLabel(entry.type)}
-                </p>
-                <p className="text-sm text-[var(--color-ink-muted)]">
-                  {entry.date}
-                </p>
+                </Badge>
+                <DeleteRecordButton id={entry.id} deleteAction={deleteSpeakingEntry} label="record" />
               </div>
-
-              {/* Criteria mini display */}
-              <div className="hidden sm:flex items-center gap-3 shrink-0">
-                {SPEAKING_CRITERIA.map((c) => {
-                  const score =
-                    c.id === "fluency"
-                      ? entry.fluency_score
-                      : c.id === "lexical"
-                        ? entry.lexical_score
-                        : c.id === "grammar"
-                          ? entry.grammar_score
-                          : entry.pronunciation_score;
-                  return (
-                    <div key={c.id} className="text-center">
-                      <p className="text-[0.65rem] text-[var(--color-ink-muted)] uppercase tracking-wide">
-                        {c.shortName}
-                      </p>
-                      <p className="text-sm font-mono font-semibold text-[var(--color-ink)]">
-                        {score ?? "—"}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <Badge variant={typeBadgeVariant(entry.type)}>
-                {typeLabel(entry.type)}
-              </Badge>
-            </Link>
+            </div>
           ))}
         </div>
       )}

@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { getListeningRecords } from "./actions";
+import { getListeningRecords, deleteListeningRecord } from "./actions";
 import { Badge } from "@/components/ui/badge";
+import { DeleteRecordButton } from "@/components/ui/delete-record-button";
 import { bandToColor } from "@/lib/constants/band-tables";
 import { Headphones, Plus } from "lucide-react";
 
@@ -46,25 +47,26 @@ export default async function ListeningPage() {
       ) : (
         <div className="space-y-3">
           {records.map((record) => (
-            <Link
-              key={record.id}
-              href={`/listening/${record.id}`}
-              className="card-interactive flex items-center gap-4 p-4"
-            >
-              <div
-                className="w-12 h-12 rounded-lg flex items-center justify-center font-mono font-bold text-white text-sm shrink-0"
-                style={{ backgroundColor: bandToColor(record.estimated_band || 0) }}
+            <div key={record.id} className="card-interactive flex items-center gap-4 p-4">
+              <Link
+                href={`/listening/${record.id}`}
+                className="flex items-center gap-4 flex-1 min-w-0"
               >
-                {record.estimated_band?.toFixed(1) || "—"}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-[var(--color-ink)] truncate">
-                  {record.test_name || "Untitled Test"}
-                </p>
-                <p className="text-sm text-[var(--color-ink-muted)]">
-                  {record.date} &middot; {record.total_score}/40
-                </p>
-              </div>
+                <div
+                  className="w-12 h-12 rounded-lg flex items-center justify-center font-mono font-bold text-white text-sm shrink-0"
+                  style={{ backgroundColor: bandToColor(record.estimated_band || 0) }}
+                >
+                  {record.estimated_band?.toFixed(1) || "—"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-[var(--color-ink)] truncate">
+                    {record.test_name || "Untitled Test"}
+                  </p>
+                  <p className="text-sm text-[var(--color-ink-muted)]">
+                    {record.date} &middot; {record.total_score}/40
+                  </p>
+                </div>
+              </Link>
               <div className="flex items-center gap-2 shrink-0">
                 <Badge variant={record.source === "cambridge" ? "info" : "default"}>
                   {record.source}
@@ -74,8 +76,9 @@ export default async function ListeningPage() {
                     {"★".repeat(record.self_rating)}
                   </span>
                 )}
+                <DeleteRecordButton id={record.id} deleteAction={deleteListeningRecord} label="record" />
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}
