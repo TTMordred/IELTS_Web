@@ -13,7 +13,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { entryId } = await request.json();
+  const body = await request.json();
+  const { entryId, taskType, subType, questionText, essayContent } = body;
+
+  // Mode 1: direct content (pre-submission grading)
+  if (!entryId && taskType && essayContent) {
+    const model = await getAIModel();
+    try {
+      const result = await gradeWritingEssay({
+        taskType: taskType as "task1" | "task2",
+        subType: subType ?? "",
+        questionText: questionText ?? "",
+        essayContent,
+        model,
+      });
+      return NextResponse.json(result);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "AI grading failed";
+      return NextResponse.json({ error: message }, { status: 500 });
+    }
+  }
+
+  // Mode 2: entryId-based (post-save grading from detail page)
+  if (!entryId) {
+    return NextResponse.json(
+      { error: "Provide either entryId or direct content (taskType + essayContent)" },
+      { status: 400 }
+    );
+  }
 
   const [{ data: entry, error }, model] = await Promise.all([
     supabase

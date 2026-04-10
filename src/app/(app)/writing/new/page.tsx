@@ -12,7 +12,7 @@ import {
   WRITING_TOPIC_CATEGORIES,
 } from "@/lib/constants/writing-types";
 import { createWritingEntry } from "../actions";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 
 function countWords(html: string): number {
   const plain = html.replace(/<[^>]*>/g, " ");
@@ -44,6 +44,10 @@ export default function NewWritingEntryPage() {
   const [graScore, setGraScore] = useState<number>(6);
   const [feedback, setFeedback] = useState("");
 
+  const [aiGrading, setAiGrading] = useState(false);
+  const [aiGraded, setAiGraded] = useState(false);
+  const [aiGradeError, setAiGradeError] = useState<string | null>(null);
+
   const wordCount = countWords(essayContent);
   const estimatedBand = roundToHalf((taScore + ccScore + lrScore + graScore) / 4);
 
@@ -52,6 +56,38 @@ export default function NewWritingEntryPage() {
   function handleTaskTypeSwitch(type: "task1" | "task2") {
     setTaskType(type);
     setSubType("");
+  }
+
+  async function handleAIGrade() {
+    setAiGrading(true);
+    setAiGradeError(null);
+    try {
+      const res = await fetch("/api/ai/grade-writing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          taskType,
+          subType,
+          questionText,
+          essayContent,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "AI grading failed");
+      }
+      const result = await res.json();
+      setTaScore(result.ta ?? 6);
+      setCcScore(result.cc ?? 6);
+      setLrScore(result.lr ?? 6);
+      setGraScore(result.gra ?? 6);
+      if (result.feedback) setFeedback(result.feedback);
+      setAiGraded(true);
+    } catch (err) {
+      setAiGradeError(err instanceof Error ? err.message : "AI grading failed");
+    } finally {
+      setAiGrading(false);
+    }
   }
 
   async function handleSubmit() {
@@ -273,6 +309,52 @@ export default function NewWritingEntryPage() {
                 <span className="text-sm font-mono font-semibold text-[#993556]">
                   Band {estimatedBand.toFixed(1)}
                 </span>
+              </div>
+
+              {/* AI Grade option */}
+              <div className="mb-4 p-3 rounded-lg border border-dashed border-[var(--color-line)] bg-[var(--color-surface-hover)]">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-[var(--color-ink)]">
+                      Don&apos;t know your score?
+                    </p>
+                    <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
+                      Let AI grade your essay and auto-fill the scores below.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAIGrade}
+                    disabled={aiGrading || wordCount === 0}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-[#993556] text-white hover:bg-[#7a2944] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0 cursor-pointer"
+                  >
+                    {aiGrading ? (
+                      <>
+                        <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Grading…
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3.5 h-3.5" />
+                        Grade with AI
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {aiGraded && !aiGradeError && (
+                  <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                    ✓ AI graded — review and adjust scores before saving.
+                  </p>
+                )}
+                {aiGradeError && (
+                  <p className="mt-2 text-xs text-[var(--color-critical)]">
+                    {aiGradeError}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-4">
