@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 
 const DEFAULT_MODEL = "gemini-2.5-flash";
+const VALID_MODELS = ["gemini-2.5-flash", "gemini-3.1-pro-preview"];
+
 
 /**
  * Check if AI features are enabled (admin toggle).
@@ -34,7 +36,8 @@ export async function getAIModel(): Promise<string> {
       .eq("key", "ai_model")
       .single();
 
-    return data?.value || DEFAULT_MODEL;
+    const stored = data?.value;
+    return stored && VALID_MODELS.includes(stored) ? stored : DEFAULT_MODEL;
   } catch {
     return DEFAULT_MODEL;
   }

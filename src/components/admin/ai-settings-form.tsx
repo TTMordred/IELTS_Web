@@ -74,7 +74,7 @@ export function AISettingsForm({
         <div className="grid grid-cols-2 gap-2">
           {[
             { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash", desc: "Fast & cheap (~$0.15/1M tokens)", icon: "⚡" },
-            { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro", desc: "Higher quality (~$1.25/1M tokens)", icon: "🎯" },
+            { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro", desc: "Higher quality (~$1.25/1M tokens)", icon: "🎯" },
           ].map((m) => (
             <button
               key={m.id}
