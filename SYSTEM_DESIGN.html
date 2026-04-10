@@ -338,7 +338,7 @@
 <nav class="sidebar">
   <div class="logo">
     <span>IELTS SELF-STUDY HUB</span>
-    <small>Product System Design v3.0</small>
+    <small>Product System Design v5.0</small>
   </div>
 
   <h2>Overview</h2>
@@ -382,6 +382,12 @@
     <li><a href="#gamification">Gamification</a></li>
     <li><a href="#cross-features">Cross-Module Features</a></li>
     <li><a href="#phases">Phasing Roadmap</a></li>
+    <li><a href="#ai-engine">AI Engine</a></li>
+    <div class="sub-items">
+      <a href="#ai-model-selection">Model Selection</a>
+      <a href="#ai-functions">Core Functions</a>
+      <a href="#ai-teacher-pipeline">Teacher Feedback Pipeline</a>
+    </div>
   </ol>
 
   <h2>Wireframes &amp; Flows</h2>
@@ -428,7 +434,7 @@
 <header class="page-header">
   <h1>IELTS <span>Self-Study Hub</span></h1>
   <div class="subtitle">Product System Design &mdash; All-in-One Tracking, Notes & Analytics Platform</div>
-  <div class="version">V4.0 &middot; 2026-04-05 &middot; Full Product Design + Future Phase Specs (30 features)</div>
+  <div class="version">V5.0 &middot; 2026-04-10 &middot; Full Product Design + AI Engine LIVE + Future Phase Specs (30 features)</div>
 </header>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
@@ -485,7 +491,7 @@
     <div class="pipeline" style="justify-content: center; margin: 12px 0;">
       <div class="pipeline-stage ps-core">📊 Dashboard & Analytics</div>
       <span class="pipeline-arrow">&rarr;</span>
-      <div class="pipeline-stage ps-ai">🤖 AI Insights (Phase 3)</div>
+      <div class="pipeline-stage ps-ai">🤖 AI Engine (Gemini — LIVE)</div>
     </div>
   </div>
 </section>
@@ -527,10 +533,10 @@
                <span class="hl-dim">┌────────────┼────────────┐</span>
                <span class="hl-dim">│</span>            <span class="hl-dim">│</span>            <span class="hl-dim">│</span>
         <span class="hl-yellow">┌──────┴──────┐</span>  <span class="hl-accent">┌──┴───┐</span>  <span class="hl-dim">┌──────┴──────┐</span>
-        <span class="hl-yellow">│ ANALYTICS   │</span>  <span class="hl-accent">│GAMIFY│</span>  <span class="hl-dim">│  AI ENGINE  │</span>
-        <span class="hl-yellow">│ Heatmaps    │</span>  <span class="hl-accent">│XP/Str│</span>  <span class="hl-dim">│  (Phase 3)  │</span>
-        <span class="hl-yellow">│ Trends      │</span>  <span class="hl-accent">│Badge │</span>  <span class="hl-dim">│  Feedback   │</span>
-        <span class="hl-yellow">└─────────────┘</span>  <span class="hl-accent">└──────┘</span>  <span class="hl-dim">└─────────────┘</span>
+        <span class="hl-yellow">│ ANALYTICS   │</span>  <span class="hl-accent">│GAMIFY│</span>  <span class="hl-purple">│  AI ENGINE  │</span>
+        <span class="hl-yellow">│ Heatmaps    │</span>  <span class="hl-accent">│XP/Str│</span>  <span class="hl-purple">│Gemini LIVE  │</span>
+        <span class="hl-yellow">│ Trends      │</span>  <span class="hl-accent">│Badge │</span>  <span class="hl-purple">│  Feedback   │</span>
+        <span class="hl-yellow">└─────────────┘</span>  <span class="hl-accent">└──────┘</span>  <span class="hl-purple">└─────────────┘</span>
     </pre>
   </div>
 
@@ -1588,6 +1594,67 @@
       <strong>Grammar Note Template:</strong> Mỗi grammar note gồm: Rule (quy tắc), Correct Examples (3+), Common Mistakes (lỗi hay gặp), Practice Sentences, Source (từ bài nào phát hiện lỗi).
     </div>
   </div>
+
+  <!-- AI GRADING SUBSECTION -->
+  <div class="card card-writing" id="w-ai-grade">
+    <h3>AI Grading Flow <span class="badge badge-ai" style="margin-left:8px;">LIVE</span></h3>
+    <p>Writing module tích hợp Gemini AI để chấm điểm essay trực tiếp. Có 2 mode:</p>
+
+    <div class="sub-header" style="margin-top:16px;">
+      <span class="sub-badge sb-t1">Mode 1</span>
+      <span class="sub-title">Pre-save Grading &mdash; "AI Ch&#7845;m &#272;i&#7875;m" button on /writing/new</span>
+    </div>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num purple">1</div>
+        <div class="flow-content">
+          <div class="flow-title">User fills essay form</div>
+          <div class="flow-desc">Nh&#7853;p taskType, subType, questionText, essayContent v&agrave;o form /writing/new</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num purple">2</div>
+        <div class="flow-content">
+          <div class="flow-title">Click "AI Ch&#7845;m &#272;i&#7875;m"</div>
+          <div class="flow-desc">POST /api/ai/grade-writing &rarr; { taskType, subType, questionText, essayContent } &mdash; essay ch&#432;a c&#7847;n l&#432;u</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num purple">3</div>
+        <div class="flow-content">
+          <div class="flow-title">Gemini grades on-the-fly</div>
+          <div class="flow-desc">gradeWritingEssay() g&#7885;i Gemini API &rarr; tr&#7843; v&#7873; { band, ta, cc, lr, gra, teacherFeedback }</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num purple">4</div>
+        <div class="flow-content">
+          <div class="flow-title">Scores auto-fill + feedback shown inline</div>
+          <div class="flow-desc">Band + 4 sub-scores t&#7921; &#273;&#7897;ng &#273;i&#7873;n v&agrave;o form. Teacher feedback hi&#7875;n th&#7883; inline. User c&oacute; th&#7875; dùng AI scores ho&#7863;c nh&#7853;p tay.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num purple">5</div>
+        <div class="flow-content">
+          <div class="flow-title">Save entry</div>
+          <div class="flow-desc">Submit form &rarr; t&#7841;o writing_entries record, bao g&#7891;m teacher_feedback JSONB</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-header" style="margin-top:16px;">
+      <span class="sub-badge sb-t2">Mode 2</span>
+      <span class="sub-title">Post-save Grading &mdash; AiGradeWriting on /writing/[id]</span>
+    </div>
+    <p class="text-dim" style="font-size:0.85rem;">POST /api/ai/grade-writing &rarr; { entryId } &rarr; l&#7845;y essay t&#7915; DB &rarr; grade &rarr; c&#7853;p nh&#7853;t writing_entries (scores + teacher_feedback).</p>
+
+    <div class="alert alert-purple mt-16">
+      <strong>TeacherFeedback Structure (5 sections):</strong><br>
+      <code style="color:#bb66ff;font-size:0.82rem;">{ logic, structure, grammar, vocab, enhancement }</code> &mdash; m&#7895;i field 2-4 c&acirc;u ti&#7871;ng Vi&#7879;t.<br>
+      Hi&#7875;n th&#7883; qua <strong>TeacherFeedbackPanel</strong> component (native &lt;details&gt;/&lt;summary&gt; accordion, no client JS).<br>
+      Section headers: 🧠 L&#7853;p lu&#7853;n &amp; T&#432; duy &middot; 📐 C&#7845;u tr&uacute;c b&agrave;i vi&#7871;t &middot; ✏️ Ng&#7919; ph&aacute;p &middot; 📚 T&#7915; v&#7921;ng &middot; 🎯 C&#7847;n c&#7843;i thi&#7879;n
+    </div>
+  </div>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
@@ -1750,7 +1817,9 @@
   ├── cc_score          <span class="hl-dim">integer 1-9 (Coherence & Cohesion)</span>
   ├── lr_score          <span class="hl-dim">integer 1-9 (Lexical Resource)</span>
   ├── gra_score         <span class="hl-dim">integer 1-9 (Grammar Range & Accuracy)</span>
-  ├── feedback          <span class="hl-dim">text (teacher/AI feedback)</span>
+  ├── feedback          <span class="hl-dim">text (teacher/AI feedback — plain text)</span>
+  ├── teacher_feedback  <span class="hl-dim">JSONB NULL (AI teacher feedback — 5-section structured JSON)</span>
+  │   <span class="hl-dim">{ logic, structure, grammar, vocab, enhancement }</span>
   └── created_at        <span class="hl-dim">timestamp</span>
 
 <span class="hl-purple">grammar_notes</span>
@@ -1903,6 +1972,74 @@
         <div class="flow-content">
           <div class="flow-title">Log & Track Improvement</div>
           <div class="flow-desc">Log bài mới &rarr; heatmap cập nhật &rarr; thấy tiến bộ từ đỏ → vàng → xanh</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Flow 4: AI Writing Grading (Pre-save) <span class="badge badge-ai" style="margin-left:8px;">LIVE</span></h3>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num purple">1</div>
+        <div class="flow-content">
+          <div class="flow-title">M&#7903; /writing/new</div>
+          <div class="flow-desc">Ch&#7885;n Task Type, Sub Type, nh&#7853;p Question Text v&agrave; vi&#7871;t Essay</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num purple">2</div>
+        <div class="flow-content">
+          <div class="flow-title">Click "AI Ch&#7845;m &#272;i&#7875;m"</div>
+          <div class="flow-desc">Tr&#432;&#7899;c khi save &rarr; POST /api/ai/grade-writing v&#7899;i { taskType, subType, questionText, essayContent }</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num purple">3</div>
+        <div class="flow-content">
+          <div class="flow-title">Gemini tr&#7843; v&#7873; k&#7871;t qu&#7843;</div>
+          <div class="flow-desc">gradeWritingEssay() &rarr; band score + 4 sub-scores (TA, CC, LR, GRA) + TeacherFeedback 5 sections</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num purple">4</div>
+        <div class="flow-content">
+          <div class="flow-title">Scores auto-fill v&agrave;o form</div>
+          <div class="flow-desc">Band + sub-scores t&#7921; &#273;&#7897;ng &#273;i&#7873;n. TeacherFeedbackPanel hi&#7875;n th&#7883; inline v&#7899;i 5 accordion sections.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num purple">5</div>
+        <div class="flow-content">
+          <div class="flow-title">User review + Save</div>
+          <div class="flow-desc">C&oacute; th&#7875; gi&#7919; AI scores ho&#7863;c s&#7917;a tay &rarr; Submit &rarr; writing_entries &#273;&#432;&#7907;c l&#432;u k&egrave;m teacher_feedback JSONB</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Flow 5: Delete Record</h3>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num teal">1</div>
+        <div class="flow-content">
+          <div class="flow-title">V&agrave;o trang list (Listening / Reading / Speaking / Writing)</div>
+          <div class="flow-desc">M&#7895;i record card hi&#7875;n th&#7883; trash icon (DeleteRecordButton) &mdash; click d&#7915;ng n&#7843;y không navigate sang detail</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num teal">2</div>
+        <div class="flow-content">
+          <div class="flow-title">X&aacute;c nh&#7853;n x&oacute;a</div>
+          <div class="flow-desc">window.confirm() dialog &rarr; user confirm &rarr; DELETE request v&#7899;i useTransition (pending state)</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num teal">3</div>
+        <div class="flow-content">
+          <div class="flow-title">Record b&#7883; x&oacute;a, list t&#7921; refresh</div>
+          <div class="flow-desc">Server action x&oacute;a kh&#7887;i DB &rarr; revalidatePath &rarr; list c&#7853;p nh&#7853;t t&#7921; &#273;&#7897;ng</div>
         </div>
       </div>
     </div>
@@ -2222,9 +2359,13 @@
   </div>
 
   <div class="card">
-    <h3>Phase 3 &mdash; Intelligence & Polish</h3>
+    <h3>Phase 3 &mdash; Intelligence & Polish <span class="badge badge-ai" style="margin-left:8px;">Partially LIVE</span></h3>
     <ul class="checklist">
-      <li>AI Writing feedback (integrate OpenAI/Claude API)</li>
+      <li>✅ AI Writing grading &mdash; Gemini 2.5 Flash / 3.1 Pro integration LIVE</li>
+      <li>✅ AI "Grade with AI" pre-save flow on /writing/new</li>
+      <li>✅ Structured 5-section TeacherFeedback (logic, structure, grammar, vocab, enhancement)</li>
+      <li>✅ Admin model selector (/admin) &mdash; gemini-2.5-flash / gemini-3.1-pro-preview</li>
+      <li>✅ Delete records feature on all 4 skill list pages</li>
       <li>AI weakness analysis + recommendations</li>
       <li>AI Speaking feedback (from recording)</li>
       <li>Advanced analytics (radar chart, prediction)</li>
@@ -2237,10 +2378,133 @@
   </div>
 
   <div class="alert alert-success">
-    <strong>Philosophy:</strong> Ship MVP fast, get students using it, iterate based on real feedback. Mỗi phase ~2-4 tuần nếu focused.
+    <strong>Philosophy:</strong> Ship MVP fast, get students using it, iterate based on real feedback. Mỗi phase ~2-4 tuần nếu focused. Phase 3 AI features are now partially live as of 2026-04-10.
   </div>
 </section>
 
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION AI: AI ENGINE                                       -->
+<!-- Added v5.0 — 2026-04-10                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="ai-engine">
+  <div class="section-header">
+    <span class="section-num" style="background:#aa44ff20;color:#bb66ff;">AI</span>
+    <h2>AI Engine <span class="badge badge-ai" style="margin-left:8px;">LIVE</span></h2>
+  </div>
+
+  <div class="alert alert-purple">
+    Gemini AI integration is <strong>active</strong> as of v5.0 (2026-04-10). Model: <code style="color:#bb66ff;">gemini-2.5-flash</code> (default) or <code style="color:#bb66ff;">gemini-3.1-pro-preview</code> (Pro). Admin configures model via /admin settings page.
+  </div>
+
+  <!-- MODEL SELECTION -->
+  <div class="card" id="ai-model-selection">
+    <h3>Model Selection Flow</h3>
+    <pre class="arch">
+<span class="hl-accent">Admin /admin page</span>
+        <span class="hl-dim">│</span>
+        <span class="hl-dim">▼</span>
+<span class="hl-white">Save model preference</span> <span class="hl-dim">→  DB settings table</span>
+        <span class="hl-dim">│</span>
+        <span class="hl-dim">▼</span>
+<span class="hl-accent">getAIModel()</span>  <span class="hl-dim">src/lib/ai/check-ai-enabled.ts</span>
+        <span class="hl-dim">│</span>
+        <span class="hl-dim">├── read model from DB</span>
+        <span class="hl-dim">├── validate against VALID_MODELS[]</span>
+        <span class="hl-dim">│       VALID_MODELS = ["gemini-2.5-flash", "gemini-3.1-pro-preview"]</span>
+        <span class="hl-dim">└── fallback to "gemini-2.5-flash" if invalid</span>
+        <span class="hl-dim">│</span>
+        <span class="hl-dim">▼</span>
+<span class="hl-purple">gemini.ts</span>  <span class="hl-dim">→  GoogleGenerativeAI(@google/generative-ai SDK)</span>
+        <span class="hl-dim">│</span>
+        <span class="hl-dim">▼</span>
+<span class="hl-white">Gemini API call</span>
+    </pre>
+    <div class="grid-2" style="margin-top:12px;">
+      <div class="stat-card">
+        <div class="stat-num" style="font-size:1rem;color:#bb66ff;">gemini-2.5-flash</div>
+        <div class="stat-label">Default model &mdash; fast, cost-effective</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="font-size:1rem;color:#bb66ff;">gemini-3.1-pro-preview</div>
+        <div class="stat-label">Pro model &mdash; higher quality feedback</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CORE FUNCTIONS -->
+  <div class="card" id="ai-functions">
+    <h3>Core AI Functions <span class="text-dim text-sm">(src/lib/ai/gemini.ts)</span></h3>
+
+    <div class="sub-header">
+      <span class="sub-badge" style="background:#993556;">gradeWritingEssay()</span>
+      <span class="sub-title">Writing Essay Grader</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">taskType</td><td>string</td><td>"task1" | "task2"</td></tr>
+          <tr><td class="mono">subType</td><td>string</td><td>line_graph, bar_chart, opinion... etc.</td></tr>
+          <tr><td class="mono">questionText</td><td>string</td><td>The IELTS question prompt</td></tr>
+          <tr><td class="mono">essayContent</td><td>string</td><td>User's written essay</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="text-dim text-sm mt-8"><strong style="color:#ccc;">Returns:</strong> <code style="color:#bb66ff;">{ band, ta_score, cc_score, lr_score, gra_score, teacherFeedback: TeacherFeedback }</code></p>
+
+    <div class="sub-header" style="margin-top:20px;">
+      <span class="sub-badge" style="background:#1D9E75;">evaluateSpeaking()</span>
+      <span class="sub-title">Speaking Evaluator</span>
+    </div>
+    <p class="text-dim text-sm">Evaluates speaking entries &mdash; returns fluency, vocab, grammar, pronunciation scores + feedback. Used on speaking detail page.</p>
+
+    <div class="sub-header" style="margin-top:20px;">
+      <span class="sub-badge" style="background:#378ADD;">analyzeErrors()</span>
+      <span class="sub-title">Error Pattern Analyzer</span>
+    </div>
+    <p class="text-dim text-sm">Analyzes patterns across multiple entries &mdash; identifies recurring grammar mistakes, vocabulary gaps, structural weaknesses. Powers the analytics recommendations.</p>
+  </div>
+
+  <!-- TEACHER FEEDBACK PIPELINE -->
+  <div class="card" id="ai-teacher-pipeline">
+    <h3>Teacher Feedback Pipeline</h3>
+    <pre class="arch">
+<span class="hl-white">Gemini prompt</span>  <span class="hl-dim">(structured JSON request in Vietnamese)</span>
+        <span class="hl-dim">│</span>
+        <span class="hl-dim">▼</span>
+<span class="hl-accent">JSON response</span>
+  <span class="hl-dim">{</span>
+    <span class="hl-purple">logic</span><span class="hl-dim">:        "..."  // Lập luận & tư duy (2-4 sentences)</span>
+    <span class="hl-purple">structure</span><span class="hl-dim">:    "..."  // Cấu trúc bài viết (2-4 sentences)</span>
+    <span class="hl-purple">grammar</span><span class="hl-dim">:      "..."  // Ngữ pháp — specific mistakes (2-4 sentences)</span>
+    <span class="hl-purple">vocab</span><span class="hl-dim">:        "..."  // Từ vựng — range, accuracy (2-4 sentences)</span>
+    <span class="hl-purple">enhancement</span><span class="hl-dim">: "..."  // Cần cải thiện cụ thể (2-4 sentences)</span>
+  <span class="hl-dim">}</span>
+        <span class="hl-dim">│</span>
+        <span class="hl-dim">▼</span>
+<span class="hl-white">TeacherFeedback interface</span>  <span class="hl-dim">src/lib/types.ts</span>
+        <span class="hl-dim">│</span>
+        <span class="hl-dim">▼</span>
+<span class="hl-accent">writing_entries.teacher_feedback</span>  <span class="hl-dim">JSONB column (schema-2.5.sql)</span>
+        <span class="hl-dim">│</span>
+        <span class="hl-dim">▼</span>
+<span class="hl-white">TeacherFeedbackPanel</span>  <span class="hl-dim">component — native &lt;details&gt;/&lt;summary&gt; accordion</span>
+  <span class="hl-dim">├── 🧠 Lập luận &amp; Tư duy</span>
+  <span class="hl-dim">├── 📐 Cấu trúc bài viết</span>
+  <span class="hl-dim">├── ✏️ Ngữ pháp</span>
+  <span class="hl-dim">├── 📚 Từ vựng</span>
+  <span class="hl-dim">└── 🎯 Cần cải thiện</span>
+    </pre>
+    <div class="alert alert-info mt-16">
+      <strong>Key files:</strong>
+      <code style="color:#6699ff;">src/lib/ai/check-ai-enabled.ts</code> &mdash; AI feature gate + model resolution &middot;
+      <code style="color:#6699ff;">src/lib/ai/gemini.ts</code> &mdash; Gemini SDK wrapper + all AI functions &middot;
+      <code style="color:#6699ff;">src/lib/types.ts</code> &mdash; TeacherFeedback interface &middot;
+      <code style="color:#6699ff;">src/app/api/ai/grade-writing/route.ts</code> &mdash; API route (Mode 1 + Mode 2)
+    </div>
+  </div>
+</section>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
 <!-- V2 EXPANSION BOUNDARY — Sections 13-21 added 2026-04-04   -->

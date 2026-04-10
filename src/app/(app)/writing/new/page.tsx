@@ -118,6 +118,7 @@ export default function NewWritingEntryPage() {
       if (err instanceof Error) {
         setError(err.message || "Failed to save");
         setLoading(false);
+        return;
       }
       // re-throw NEXT_REDIRECT (not an Error instance) so navigation proceeds
       throw err;
