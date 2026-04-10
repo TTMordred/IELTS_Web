@@ -380,7 +380,7 @@
 <nav class="sidebar">
   <div class="logo">
     <span>IELTS SELF-STUDY HUB</span>
-    <small>Product System Design v5.0</small>
+    <small>Product System Design v5.1</small>
   </div>
 
   <h2>Overview</h2>
@@ -2325,7 +2325,7 @@
 
 <!-- ═══════════════════════════════════════════════════════════ -->
 <!-- SECTION AI: AI ENGINE                                       -->
-<!-- Added v5.0 — 2026-04-10                                    -->
+<!-- Added v5.0 — 2026-04-10 | Updated v5.1 — 2026-04-10       -->
 <!-- ═══════════════════════════════════════════════════════════ -->
 <section class="section" id="ai-engine">
   <div class="section-header">
@@ -2382,7 +2382,7 @@
         </tbody>
       </table>
     </div>
-    <p class="text-dim text-sm mt-8"><strong style="color:#374151;">Returns:</strong> <code style="color:#7c3aed;">{ band, ta_score, cc_score, lr_score, gra_score, teacherFeedback: TeacherFeedback }</code></p>
+    <p class="text-dim text-sm mt-8"><strong style="color:#374151;">Returns:</strong> <code style="color:#7c3aed;">{ band, ta_score, cc_score, lr_score, gra_score, teacherFeedback: RichTeacherFeedback }</code></p>
 
     <div class="sub-header" style="margin-top:20px;">
       <span class="sub-badge" style="background:#1D9E75;">evaluateSpeaking()</span>
@@ -2397,25 +2397,148 @@
     <p class="text-dim text-sm">Analyzes patterns across multiple entries &mdash; identifies recurring grammar mistakes, vocabulary gaps, structural weaknesses. Powers the analytics recommendations.</p>
   </div>
 
-  <!-- TEACHER FEEDBACK PIPELINE -->
-  <div class="card" id="ai-teacher-pipeline">
-    <h3>Teacher Feedback Pipeline</h3>
+  <!-- RICH TEACHER FEEDBACK v2 SCHEMA -->
+  <div class="card" id="ai-rich-feedback-schema">
+    <h3>RichTeacherFeedback v2 &mdash; JSON Schema</h3>
+    <p class="text-dim text-sm" style="margin-bottom:12px;">Structured response returned by <code style="color:#7c3aed;">gradeWritingEssay()</code> and stored in <code style="color:#7c3aed;">writing_entries.teacher_feedback</code> JSONB column.</p>
+    <div style="background:#1e1b4b;border-radius:10px;padding:20px;font-family:monospace;font-size:0.8rem;line-height:1.7;color:#e0e7ff;overflow-x:auto;">
+<pre style="margin:0;white-space:pre-wrap;"><span style="color:#a5b4fc;">RichTeacherFeedback</span> {
+  <span style="color:#6ee7b7;">version</span>: <span style="color:#fbbf24;">2</span>
+  <span style="color:#6ee7b7;">taskType</span>: <span style="color:#f9a8d4;">"task1"</span> | <span style="color:#f9a8d4;">"task2"</span>
+
+  <span style="color:#6ee7b7;">essayMeta</span>: {
+    <span style="color:#c4b5fd;">wordCount</span>: number
+    <span style="color:#c4b5fd;">sentenceCount</span>: number
+    <span style="color:#c4b5fd;">paragraphCount</span>: number
+    <span style="color:#c4b5fd;">avgWordsPerSentence</span>: number
+    <span style="color:#c4b5fd;">meetsWordRequirement</span>: boolean
+  }
+
+  <span style="color:#6ee7b7;">criteria</span>[4]: {          <span style="color:#94a3b8;">// TA/TR · CC · LR · GRA</span>
+    <span style="color:#c4b5fd;">id</span>: string
+    <span style="color:#c4b5fd;">name</span>: string
+    <span style="color:#c4b5fd;">band</span>: number
+    <span style="color:#c4b5fd;">verdict</span>: string
+    <span style="color:#c4b5fd;">strengths</span>: string[]
+    <span style="color:#c4b5fd;">weaknesses</span>: string[]
+    <span style="color:#c4b5fd;">tips</span>: string[]
+  }
+
+  <span style="color:#6ee7b7;">vocabUpgrades</span>[]: {      <span style="color:#94a3b8;">// 3-5 entries</span>
+    <span style="color:#c4b5fd;">original</span>: string
+    <span style="color:#c4b5fd;">frequency</span>: string
+    <span style="color:#c4b5fd;">upgrades</span>: string[]
+    <span style="color:#c4b5fd;">context</span>: string
+  }
+
+  <span style="color:#6ee7b7;">grammarLog</span>[]: {
+    <span style="color:#c4b5fd;">type</span>: <span style="color:#f9a8d4;">"error"</span> | <span style="color:#f9a8d4;">"enhancement"</span>
+    <span style="color:#c4b5fd;">original</span>: string
+    <span style="color:#c4b5fd;">corrected</span>: string
+    <span style="color:#c4b5fd;">rule</span>: string
+  }
+
+  <span style="color:#6ee7b7;">paragraphAnalysis</span>[]: {
+    <span style="color:#c4b5fd;">index</span>: number
+    <span style="color:#c4b5fd;">function</span>: string
+    <span style="color:#c4b5fd;">status</span>: <span style="color:#f9a8d4;">"good"</span> | <span style="color:#f9a8d4;">"weak"</span> | <span style="color:#f9a8d4;">"missing"</span>
+    <span style="color:#c4b5fd;">note</span>: string
+  }
+
+  <span style="color:#6ee7b7;">modelOutline</span>[]: {      <span style="color:#94a3b8;">// Band 8+ reference</span>
+    <span style="color:#c4b5fd;">paragraph</span>: string
+    <span style="color:#c4b5fd;">goal</span>: string
+    <span style="color:#c4b5fd;">sentences</span>: number
+    <span style="color:#c4b5fd;">content</span>: string
+  }
+
+  <span style="color:#6ee7b7;">teacherComment</span>: string  <span style="color:#94a3b8;">// Vietnamese, 3 paragraphs</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- GRADING PIPELINE -->
+  <div class="card" id="ai-grading-pipeline">
+    <h3>Grading Pipeline &mdash; 9 Steps</h3>
     <div class="flowchart">
-      <div class="fc-start">Gemini prompt (structured JSON request in Vietnamese)</div>
+      <div class="fc-start">Essay submitted &rarr; <code>gradeWritingEssay()</code> called</div>
       <div class="fc-arrow">&#8595;</div>
-      <div class="fc-step" style="text-align:left;max-width:500px;"><strong>JSON response:</strong><br><code style="color:#7c3aed;">logic</code> &middot; <code style="color:#7c3aed;">structure</code> &middot; <code style="color:#7c3aed;">grammar</code> &middot; <code style="color:#7c3aed;">vocab</code> &middot; <code style="color:#7c3aed;">enhancement</code><br><small>Each field: 2-4 sentences in Vietnamese</small></div>
+      <div class="fc-step" style="background:#fef3c7;border-color:#f59e0b;text-align:left;">
+        <strong>Step 1: Detect task type</strong><br>
+        <small>task1 &rarr; criterion = <em>Task Achievement</em> &nbsp;|&nbsp; task2 &rarr; criterion = <em>Task Response</em></small>
+      </div>
       <div class="fc-arrow">&#8595;</div>
-      <div class="fc-step"><strong>TeacherFeedback interface</strong> (src/lib/types.ts)</div>
+      <div class="fc-step" style="background:#fef3c7;border-color:#f59e0b;text-align:left;">
+        <strong>Step 2: Check word count</strong><br>
+        <small>Flag <code>meetsWordRequirement = false</code> if under minimum (150 Task 1, 250 Task 2)</small>
+      </div>
       <div class="fc-arrow">&#8595;</div>
-      <div class="fc-step"><strong>writing_entries.teacher_feedback</strong> JSONB column</div>
+      <div class="fc-step" style="background:#f0fdf4;border-color:#22c55e;text-align:left;">
+        <strong>Step 3: Score 4 criteria independently with evidence</strong><br>
+        <small>TA/TR &middot; Coherence &amp; Cohesion &middot; Lexical Resource &middot; Grammatical Range &amp; Accuracy</small>
+      </div>
       <div class="fc-arrow">&#8595;</div>
-      <div class="fc-end" style="border-radius:8px;max-width:400px;">TeacherFeedbackPanel &mdash; native details/summary accordion</div>
+      <div class="fc-step" style="background:#f0fdf4;border-color:#22c55e;text-align:left;">
+        <strong>Step 4: Generate per-criterion feedback (3 layers)</strong><br>
+        <small>verdict &rarr; strengths / weaknesses &rarr; actionable tips</small>
+      </div>
+      <div class="fc-arrow">&#8595;</div>
+      <div class="fc-step" style="background:#eff6ff;border-color:#3b82f6;text-align:left;">
+        <strong>Step 5: Extract vocab upgrades</strong><br>
+        <small>3&ndash;5 repeated or informal words &rarr; academic alternatives with usage context</small>
+      </div>
+      <div class="fc-arrow">&#8595;</div>
+      <div class="fc-step" style="background:#eff6ff;border-color:#3b82f6;text-align:left;">
+        <strong>Step 6: Build grammar log</strong><br>
+        <small>Errors + enhancements with before/after sentences and rule explanation</small>
+      </div>
+      <div class="fc-arrow">&#8595;</div>
+      <div class="fc-step" style="background:#fdf4ff;border-color:#a855f7;text-align:left;">
+        <strong>Step 7: Analyze paragraph structure</strong><br>
+        <small>Per paragraph: function, status (good / weak / missing), note</small>
+      </div>
+      <div class="fc-arrow">&#8595;</div>
+      <div class="fc-step" style="background:#fdf4ff;border-color:#a855f7;text-align:left;">
+        <strong>Step 8: Generate Band 8+ model outline</strong><br>
+        <small>Reference outline with paragraph goals, sentence counts, and content guidance</small>
+      </div>
+      <div class="fc-arrow">&#8595;</div>
+      <div class="fc-step" style="background:#fff7ed;border-color:#f97316;text-align:left;">
+        <strong>Step 9: Write Vietnamese teacher comment (3 paragraphs)</strong><br>
+        <small>Strengths &rarr; priorities to improve &rarr; motivational closing</small>
+      </div>
+      <div class="fc-arrow">&#8595;</div>
+      <div class="fc-end"><code>RichTeacherFeedback</code> JSON assembled &amp; returned</div>
+    </div>
+  </div>
+
+  <!-- DISPLAY PIPELINE -->
+  <div class="card" id="ai-display-pipeline">
+    <h3>Display Pipeline</h3>
+    <div class="flowchart">
+      <div class="fc-start"><code>RichTeacherFeedback</code> JSON (from DB or fresh grading)</div>
+      <div class="fc-arrow">&#8595;</div>
+      <div class="fc-step"><strong>TeacherFeedbackPanel</strong> component<br><small>Receives full <code>RichTeacherFeedback</code> object as prop</small></div>
+      <div class="fc-arrow">&#8595;</div>
+      <div class="fc-step" style="text-align:left;max-width:520px;">
+        <strong>Collapsible sections rendered:</strong><br>
+        <span style="display:inline-block;margin-top:6px;line-height:2;">
+          <span style="background:#eef2ff;color:#7c3aed;padding:2px 8px;border-radius:4px;font-size:0.78rem;margin:2px;">Criterion Cards</span>
+          <span style="background:#f0fdf4;color:#16a34a;padding:2px 8px;border-radius:4px;font-size:0.78rem;margin:2px;">Vocab Upgrade Table</span>
+          <span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:4px;font-size:0.78rem;margin:2px;">Grammar Log</span>
+          <span style="background:#fdf4ff;color:#7e22ce;padding:2px 8px;border-radius:4px;font-size:0.78rem;margin:2px;">Paragraph Analysis</span>
+          <span style="background:#fff7ed;color:#c2410c;padding:2px 8px;border-radius:4px;font-size:0.78rem;margin:2px;">Model Outline</span>
+          <span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:0.78rem;margin:2px;">Teacher Comment</span>
+        </span>
+      </div>
+      <div class="fc-arrow">&#8595;</div>
+      <div class="fc-end">Rendered on writing detail page</div>
     </div>
     <div class="alert alert-info mt-16">
       <strong>Key files:</strong>
       <code style="color:#3b82f6;">src/lib/ai/check-ai-enabled.ts</code> &mdash; AI feature gate + model resolution &middot;
       <code style="color:#3b82f6;">src/lib/ai/gemini.ts</code> &mdash; Gemini SDK wrapper + all AI functions &middot;
-      <code style="color:#3b82f6;">src/lib/types.ts</code> &mdash; TeacherFeedback interface &middot;
+      <code style="color:#3b82f6;">src/lib/types.ts</code> &mdash; RichTeacherFeedback interface &middot;
       <code style="color:#3b82f6;">src/app/api/ai/grade-writing/route.ts</code> &mdash; API route (Mode 1 + Mode 2)
     </div>
   </div>

@@ -107,12 +107,74 @@ export type ReadingTypeResult = {
 };
 
 // ── Writing Module ──
+
+/** Legacy 5-field feedback — kept for backward compatibility with stored JSONB */
 export interface TeacherFeedback {
   logic: string;
   structure: string;
   grammar: string;
   vocab: string;
   enhancement: string;
+}
+
+/** Rich per-criterion feedback item */
+export interface CriterionFeedback {
+  id: "ta" | "cc" | "lr" | "gra";
+  name: string;
+  band: number;
+  verdict: string;
+  strengths: Array<{ text: string; evidence?: string }>;
+  weaknesses: Array<{ text: string; evidence?: string }>;
+  tips: Array<{ text: string; example?: string }>;
+}
+
+export interface VocabUpgrade {
+  original: string;
+  frequency: number;
+  upgrades: string[];
+  context: string;
+}
+
+export interface GrammarItem {
+  type: "error" | "enhancement";
+  original: string;
+  corrected: string;
+  rule: string;
+}
+
+export interface ParagraphAnalysis {
+  index: number;
+  function: "introduction" | "body" | "conclusion";
+  status: "good" | "weak" | "missing";
+  note: string;
+}
+
+export interface ModelOutlineItem {
+  paragraph: number;
+  goal: string;
+  sentences: number;
+  content: string;
+}
+
+export interface EssayMeta {
+  wordCount: number;
+  sentenceCount: number;
+  paragraphCount: number;
+  avgWordsPerSentence: number;
+  meetsWordRequirement: boolean;
+}
+
+/** Rich structured teacher feedback — v2 format */
+export interface RichTeacherFeedback {
+  version: 2;
+  taskType: "task1" | "task2";
+  essayMeta: EssayMeta;
+  criteria: CriterionFeedback[];
+  vocabUpgrades: VocabUpgrade[];
+  grammarLog: GrammarItem[];
+  paragraphAnalysis: ParagraphAnalysis[];
+  modelOutline: ModelOutlineItem[];
+  teacherComment: string;
 }
 
 export type WritingEntry = {

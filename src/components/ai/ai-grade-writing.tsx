@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Sparkles, Loader2 } from "lucide-react";
+import { saveAiGrading } from "@/app/(app)/writing/actions";
+import type { RichTeacherFeedback } from "@/lib/types";
 
 interface GradeResult {
   ta: number;
@@ -12,6 +14,7 @@ interface GradeResult {
   feedback: string;
   strengths: string[];
   improvements: string[];
+  teacherFeedback?: RichTeacherFeedback;
 }
 
 function bandColor(score: number): string {
@@ -33,6 +36,9 @@ export function AiGradeWriting({ entryId }: { entryId: string }) {
   const [result, setResult] = useState<GradeResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     const cached = localStorage.getItem(`ai-grade-writing-${entryId}`);
@@ -48,6 +54,8 @@ export function AiGradeWriting({ entryId }: { entryId: string }) {
   async function handleGrade() {
     setLoading(true);
     setError(null);
+    setSaved(false);
+    setSaveError(null);
     try {
       const res = await fetch("/api/ai/grade-writing", {
         method: "POST",
@@ -60,6 +68,26 @@ export function AiGradeWriting({ entryId }: { entryId: string }) {
       }
       setResult(data);
       localStorage.setItem(`ai-grade-writing-${entryId}`, JSON.stringify(data));
+
+      // Auto-save rich feedback to DB
+      if (data.teacherFeedback) {
+        setSaving(true);
+        try {
+          await saveAiGrading(
+            entryId,
+            { ta: data.ta, cc: data.cc, lr: data.lr, gra: data.gra, estimated_band: data.overallBand },
+            data.teacherFeedback
+          );
+          setSaved(true);
+          // Reload to show updated TeacherFeedbackPanel
+          window.location.reload();
+        } catch {
+          // Non-critical — grading display still works from local state
+          setSaveError("Could not save to database");
+        } finally {
+          setSaving(false);
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Grading failed");
     } finally {
@@ -90,6 +118,9 @@ export function AiGradeWriting({ entryId }: { entryId: string }) {
       </div>
 
       {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
+      {saving && <p className="text-sm text-[var(--color-ink-muted)] mb-3">Saving…</p>}
+      {saved && <p className="text-sm text-green-500 mb-3">Saved ✓</p>}
+      {saveError && <p className="text-sm text-amber-500 mb-3">{saveError}</p>}
 
       {result ? (
         <div className="space-y-4">

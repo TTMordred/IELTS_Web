@@ -159,3 +159,29 @@ export async function deleteWritingEntry(id: string) {
   revalidatePath("/writing");
   redirect("/writing");
 }
+
+export async function saveAiGrading(
+  id: string,
+  scores: { ta: number; cc: number; lr: number; gra: number; estimated_band: number },
+  teacherFeedback: import("@/lib/types").RichTeacherFeedback
+) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const { error } = await supabase
+    .from("writing_entries")
+    .update({
+      ta_score: scores.ta,
+      cc_score: scores.cc,
+      lr_score: scores.lr,
+      gra_score: scores.gra,
+      estimated_band: scores.estimated_band,
+      teacher_feedback: teacherFeedback as unknown as Record<string, unknown>,
+    })
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) throw error;
+  revalidatePath(`/writing/${id}`);
+}
