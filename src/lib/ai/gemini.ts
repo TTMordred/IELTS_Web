@@ -238,7 +238,13 @@ export async function gradeWritingEssay(input: {
     throw new Error("Essay too long for AI grading (max 5000 chars)");
   }
 
-  const model = getClient().getGenerativeModel({ model: input.model ?? DEFAULT_MODEL });
+  const model = getClient().getGenerativeModel({
+    model: input.model ?? DEFAULT_MODEL,
+    generationConfig: {
+      responseMimeType: "application/json",
+      maxOutputTokens: 8192,
+    },
+  });
 
   const taskLabel = input.taskType === "task1" ? "Task 1" : "Task 2";
   const criterion1Name = input.taskType === "task1" ? "Task Achievement" : "Task Response";
@@ -246,7 +252,7 @@ export async function gradeWritingEssay(input: {
     ? "covers key features, overview, data accuracy"
     : "covers addressing all parts, position clarity, idea development";
 
-  const prompt = `You are a certified senior IELTS Writing examiner with 15+ years experience, trained on official Cambridge IELTS assessment materials. Grade this IELTS ${taskLabel} essay and provide comprehensive, evidence-based feedback.
+  const prompt = `You are a certified senior IELTS Writing examiner with 15+ years experience. Grade this IELTS ${taskLabel} essay with evidence-based feedback.
 
 Essay type: ${input.subType}
 Question: ${input.questionText || "(not provided)"}
@@ -254,134 +260,37 @@ Question: ${input.questionText || "(not provided)"}
 Essay:
 ${essayText}
 
-## Scoring Instructions
+Score against official IELTS band descriptors (Band 7 reference):
+- ${criterion1Name} (ta): "${criterion1Desc}"
+- Coherence and Cohesion (cc): "uses a range of cohesive devices appropriately"
+- Lexical Resource (lr): "uses less common lexical items with some awareness of style and collocation"
+- Grammatical Range and Accuracy (gra): "uses a variety of complex structures; frequent error-free sentences"
 
-Score against official IELTS band descriptors. Use these Band 7 reference points:
-- ${criterion1Name} (ta): "presents, highlights and illustrates key features / issues clearly and appropriately" (${criterion1Desc})
-- Coherence and Cohesion (cc): "uses a range of cohesive devices appropriately although there may be some over/under-use"
-- Lexical Resource (lr): "uses less common lexical items with some awareness of style and collocation; may produce occasional errors in word choice, spelling and/or word formation"
-- Grammatical Range and Accuracy (gra): "uses a variety of complex structures; produces frequent error-free sentences; has good control of grammar and punctuation but may make a few errors"
+Score fairly — most IELTS students score band 5.0-7.0. Do not inflate.
 
-Score fairly — most IELTS students are band 5.0-7.0. Do not inflate scores.
+Return JSON with this exact structure:
+- ta, cc, lr, gra: integer scores 1-9
+- overallBand: average rounded to nearest 0.5
+- feedback: 2-3 sentence summary in Vietnamese
+- strengths: array of 2-3 strings in Vietnamese
+- improvements: array of 2-3 strings in Vietnamese
+- teacherFeedback: object with version=2, taskType="${input.taskType}", and:
+  - essayMeta: {wordCount, sentenceCount, paragraphCount, avgWordsPerSentence, meetsWordRequirement}
+  - criteria: array of 4 objects (id: ta/cc/lr/gra) each with name, band, verdict (English), strengths [{text, evidence}], weaknesses [{text, evidence}], tips [{text, example}]
+  - vocabUpgrades: [{original, frequency, upgrades[], context}] — 3-5 repeated/informal words
+  - grammarLog: [{type: "error"|"enhancement", original, corrected, rule}] — 2-3 items
+  - paragraphAnalysis: [{index, function: "introduction"|"body"|"conclusion", status: "good"|"weak"|"missing", note}]
+  - modelOutline: [{paragraph, goal, sentences, content}] — 4-5 steps for Band 8+
+  - teacherComment: 3 paragraphs in Vietnamese (strengths, priorities, motivation)`;
 
-## Feedback Instructions
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
 
-1. For each criterion (ta, cc, lr, gra): provide a verdict, strengths with evidence (quote specific phrases/sentences from the essay), weaknesses with evidence, and actionable tips with examples.
-
-2. Identify the 3-5 most repeated or informal words. For each: list the word, how many times it appears, 2-3 academic/formal alternatives, and a usage context note.
-
-3. Find 2-3 specific grammar errors OR enhancement opportunities. Show the exact original sentence, corrected version, and grammar rule in English.
-
-4. Analyze each paragraph: identify its function (introduction/body/conclusion), rate it (good/weak/missing), and give a one-sentence note.
-
-5. Generate a Band 8+ model outline with 4-5 steps. Each step: paragraph number, goal, recommended sentence count, and specific content guidance.
-
-6. Compute essay statistics: word count, sentence count, paragraph count, average words per sentence, and whether it meets the minimum word requirement (150 for Task 1, 250 for Task 2).
-
-7. Write a warm, encouraging holistic comment in Vietnamese (teacherComment). Paragraph 1: strengths. Paragraph 2: top 3 priorities for improvement. Paragraph 3: motivational closing with next steps.
-
-## Output Format
-
-Return ONLY valid JSON (no markdown, no code blocks):
-{
-  "ta": <integer 1-9>,
-  "cc": <integer 1-9>,
-  "lr": <integer 1-9>,
-  "gra": <integer 1-9>,
-  "overallBand": <average of 4 scores rounded to nearest 0.5>,
-  "feedback": "<2-3 sentences overall summary in Vietnamese>",
-  "strengths": ["<strength 1 in Vietnamese>", "<strength 2>"],
-  "improvements": ["<improvement 1 in Vietnamese>", "<improvement 2>", "<improvement 3>"],
-  "teacherFeedback": {
-    "version": 2,
-    "taskType": "${input.taskType}",
-    "essayMeta": {
-      "wordCount": <number>,
-      "sentenceCount": <number>,
-      "paragraphCount": <number>,
-      "avgWordsPerSentence": <number rounded to 1 decimal>,
-      "meetsWordRequirement": <boolean>
-    },
-    "criteria": [
-      {
-        "id": "ta",
-        "name": "${criterion1Name}",
-        "band": <integer 1-9>,
-        "verdict": "<1-2 sentence assessment in English>",
-        "strengths": [{"text": "<strength>", "evidence": "<quoted phrase from essay>"}],
-        "weaknesses": [{"text": "<weakness>", "evidence": "<quoted phrase from essay>"}],
-        "tips": [{"text": "<actionable tip>", "example": "<example sentence>"}]
-      },
-      {
-        "id": "cc",
-        "name": "Coherence and Cohesion",
-        "band": <integer 1-9>,
-        "verdict": "...",
-        "strengths": [...],
-        "weaknesses": [...],
-        "tips": [...]
-      },
-      {
-        "id": "lr",
-        "name": "Lexical Resource",
-        "band": <integer 1-9>,
-        "verdict": "...",
-        "strengths": [...],
-        "weaknesses": [...],
-        "tips": [...]
-      },
-      {
-        "id": "gra",
-        "name": "Grammatical Range and Accuracy",
-        "band": <integer 1-9>,
-        "verdict": "...",
-        "strengths": [...],
-        "weaknesses": [...],
-        "tips": [...]
-      }
-    ],
-    "vocabUpgrades": [
-      {"original": "<word>", "frequency": <number>, "upgrades": ["<alt1>", "<alt2>"], "context": "<usage note>"}
-    ],
-    "grammarLog": [
-      {"type": "error", "original": "<original sentence>", "corrected": "<corrected sentence>", "rule": "<grammar rule>"}
-    ],
-    "paragraphAnalysis": [
-      {"index": 1, "function": "introduction", "status": "good", "note": "<one sentence>"}
-    ],
-    "modelOutline": [
-      {"paragraph": 1, "goal": "Introduction", "sentences": 3, "content": "<specific guidance>"}
-    ],
-    "teacherComment": "<3 paragraphs in Vietnamese: strengths, priorities, motivation>"
+  if (!text || text.trim().length === 0) {
+    throw new Error("AI returned empty response — model may have blocked the content");
   }
-}`;
 
-  // Retry up to 3 times — Gemini thinking models can produce non-deterministic output
-  let raw: Record<string, unknown> | null = null;
-  let lastError: unknown = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 8192 },
-      });
-
-      const text = result.response.text();
-      if (!text || text.trim().length === 0) {
-        console.error(`[AI Grade Writing] Attempt ${attempt + 1}: empty response`);
-        lastError = new Error("AI returned empty response");
-        continue;
-      }
-
-      raw = parseAIJson(text);
-      break;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error(`[AI Grade Writing] Attempt ${attempt + 1} failed:`, msg);
-      lastError = err instanceof Error ? err : new Error(msg);
-    }
-  }
-  if (!raw) throw lastError;
+  const raw = parseAIJson(text);
 
   const ta = clampScore(raw.ta);
   const cc = clampScore(raw.cc);
