@@ -12,6 +12,19 @@ import type {
 const DEFAULT_MODEL = "gemini-2.5-flash";
 const MAX_INPUT_LENGTH = 5000;
 
+function stripHtml(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function clampScore(v: unknown): number {
   const n = typeof v === "number" ? v : parseInt(String(v), 10);
   if (isNaN(n)) return 5;
@@ -219,14 +232,13 @@ export async function gradeWritingEssay(input: {
   improvements: string[];
   teacherFeedback: RichTeacherFeedback;
 }> {
-  if (input.essayContent.length > MAX_INPUT_LENGTH) {
+  const essayText = stripHtml(input.essayContent);
+
+  if (essayText.length > MAX_INPUT_LENGTH) {
     throw new Error("Essay too long for AI grading (max 5000 chars)");
   }
 
-  const model = getClient().getGenerativeModel({
-    model: input.model ?? DEFAULT_MODEL,
-    generationConfig: { responseMimeType: "application/json" },
-  });
+  const model = getClient().getGenerativeModel({ model: input.model ?? DEFAULT_MODEL });
 
   const taskLabel = input.taskType === "task1" ? "Task 1" : "Task 2";
   const criterion1Name = input.taskType === "task1" ? "Task Achievement" : "Task Response";
@@ -240,7 +252,7 @@ Essay type: ${input.subType}
 Question: ${input.questionText || "(not provided)"}
 
 Essay:
-${input.essayContent}
+${essayText}
 
 ## Scoring Instructions
 
@@ -344,9 +356,19 @@ Return ONLY valid JSON (no markdown, no code blocks):
   }
 }`;
 
-  const result = await model.generateContent(prompt);
+  const result = await model.generateContent({
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    generationConfig: { maxOutputTokens: 8192 },
+  });
   const text = result.response.text();
-  const raw = parseAIJson(text);
+
+  let raw: Record<string, unknown>;
+  try {
+    raw = parseAIJson(text);
+  } catch (err) {
+    console.error("[AI Grade Writing] Failed to parse. First 500 chars:", text.slice(0, 500));
+    throw err;
+  }
 
   const ta = clampScore(raw.ta);
   const cc = clampScore(raw.cc);
