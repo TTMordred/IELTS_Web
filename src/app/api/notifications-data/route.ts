@@ -88,12 +88,34 @@ export async function GET() {
       .limit(1),
   ]);
 
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const { data: recentNotifications } = await supabase
+    .from("notifications")
+    .select("type, metadata, created_at")
+    .eq("user_id", user.id)
+    .gte("created_at", weekAgo.toISOString());
+
+  const recentTypes = recentNotifications ?? [];
+
+  function alreadyNotifiedTodayMem(type: string): boolean {
+    return recentTypes.some(n => n.type === type && n.created_at >= `${today}T00:00:00.000Z`);
+  }
+
+  function alreadyNotifiedThisWeekMem(type: string): boolean {
+    return recentTypes.some(n => n.type === type);
+  }
+
+  function alreadyNotifiedAchievementMem(level: number): boolean {
+    return recentTypes.some(n => n.type === "achievement_unlocked" && (n.metadata as Record<string, unknown>)?.level === level);
+  }
+
   const inserts: Omit<NotificationRow, "id" | "user_id" | "created_at">[] = [];
 
   const streak = profile.data?.current_streak ?? 0;
   const activeToday = (dailyActivityToday.data?.length ?? 0) > 0;
   if (streak > 0 && !activeToday) {
-    const already = await alreadyNotifiedToday(supabase, user.id, "streak_at_risk");
+    const already = alreadyNotifiedTodayMem("streak_at_risk");
     if (!already) {
       inserts.push({
         type: "streak_at_risk",
@@ -107,7 +129,7 @@ export async function GET() {
 
   const vocabCount = vocabDue.count ?? 0;
   if (vocabCount > 0) {
-    const already = await alreadyNotifiedToday(supabase, user.id, "vocab_review_due");
+    const already = alreadyNotifiedTodayMem("vocab_review_due");
     if (!already) {
       inserts.push({
         type: "vocab_review_due",
@@ -126,7 +148,7 @@ export async function GET() {
         (new Date().getTime() - new Date(lastDate).getTime()) / 86400000
       );
       if (daysSince >= 7) {
-        const already = await alreadyNotifiedThisWeek(supabase, user.id, "writing_reminder");
+        const already = alreadyNotifiedThisWeekMem("writing_reminder");
         if (!already) {
           inserts.push({
             type: "writing_reminder",
@@ -145,7 +167,7 @@ export async function GET() {
     const threshold = LEVEL_THRESHOLDS.find((t) => t.level === milestoneLevel);
     if (!threshold) continue;
     if (totalXp >= threshold.xp) {
-      const already = await alreadyNotifiedAchievement(supabase, user.id, milestoneLevel);
+      const already = alreadyNotifiedAchievementMem(milestoneLevel);
       if (!already) {
         inserts.push({
           type: "achievement_unlocked",

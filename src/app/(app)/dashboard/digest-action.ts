@@ -1,10 +1,11 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/supabase/cached-auth";
 
 export async function getWeeklyDigest() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return null;
 
   const now = new Date();
@@ -19,21 +20,21 @@ export async function getWeeklyDigest() {
   const lastWeekStr = lastWeekStart.toISOString().split("T")[0];
   const todayStr = now.toISOString().split("T")[0];
 
-  // This week's activity
-  const { data: thisWeekActivity } = await supabase
-    .from("daily_activity")
-    .select("xp_earned, listening_count, reading_count, speaking_count, writing_count, vocab_reviewed")
-    .eq("user_id", user.id)
-    .gte("date", thisWeekStr)
-    .lte("date", todayStr);
-
-  // Last week's activity
-  const { data: lastWeekActivity } = await supabase
-    .from("daily_activity")
-    .select("xp_earned, listening_count, reading_count, speaking_count, writing_count, vocab_reviewed")
-    .eq("user_id", user.id)
-    .gte("date", lastWeekStr)
-    .lt("date", thisWeekStr);
+  // Fetch both weeks in parallel
+  const [{ data: thisWeekActivity }, { data: lastWeekActivity }] = await Promise.all([
+    supabase
+      .from("daily_activity")
+      .select("xp_earned, listening_count, reading_count, speaking_count, writing_count, vocab_reviewed")
+      .eq("user_id", user.id)
+      .gte("date", thisWeekStr)
+      .lte("date", todayStr),
+    supabase
+      .from("daily_activity")
+      .select("xp_earned, listening_count, reading_count, speaking_count, writing_count, vocab_reviewed")
+      .eq("user_id", user.id)
+      .gte("date", lastWeekStr)
+      .lt("date", thisWeekStr),
+  ]);
 
   const sum = (arr: Record<string, number>[] | null, field: string) =>
     (arr || []).reduce((s, r) => s + (r[field] || 0), 0);

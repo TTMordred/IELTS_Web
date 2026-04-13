@@ -1,4 +1,5 @@
 "use server";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -59,6 +60,98 @@ function tableToPaths(table: LinkableTable, id: string): string[] {
     case "mistake_entries":
       return ["/mistakes"];
   }
+}
+
+async function fetchLabelsInBatch(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  items: Array<{ table: LinkableTable; id: string }>
+): Promise<Map<string, string>> {
+  const labelMap = new Map<string, string>();
+
+  // Group by table
+  const groups = new Map<LinkableTable, string[]>();
+  for (const { table, id } of items) {
+    const ids = groups.get(table) ?? [];
+    ids.push(id);
+    groups.set(table, ids);
+  }
+
+  // Batch fetch per table in parallel
+  const fetches = Array.from(groups.entries()).map(async ([table, ids]) => {
+    try {
+      switch (table) {
+        case "listening_records": {
+          const { data } = await supabase
+            .from("listening_records")
+            .select("id, test_name")
+            .in("id", ids);
+          for (const r of data ?? []) {
+            labelMap.set(`${table}:${r.id}`, r.test_name ?? "Listening record");
+          }
+          break;
+        }
+        case "reading_records": {
+          const { data } = await supabase
+            .from("reading_records")
+            .select("id, test_name")
+            .in("id", ids);
+          for (const r of data ?? []) {
+            labelMap.set(`${table}:${r.id}`, r.test_name ?? "Reading record");
+          }
+          break;
+        }
+        case "writing_entries": {
+          const { data } = await supabase
+            .from("writing_entries")
+            .select("id, topic")
+            .in("id", ids);
+          for (const r of data ?? []) {
+            labelMap.set(`${table}:${r.id}`, r.topic ?? "Writing entry");
+          }
+          break;
+        }
+        case "speaking_entries": {
+          const { data } = await supabase
+            .from("speaking_entries")
+            .select("id, type, date")
+            .in("id", ids);
+          for (const r of data ?? []) {
+            labelMap.set(`${table}:${r.id}`, `Speaking - ${r.date}`);
+          }
+          break;
+        }
+        case "vocab_cards": {
+          const { data } = await supabase
+            .from("vocab_cards")
+            .select("id, word")
+            .in("id", ids);
+          for (const r of data ?? []) {
+            labelMap.set(`${table}:${r.id}`, r.word ?? "Vocab card");
+          }
+          break;
+        }
+        case "mistake_entries": {
+          const { data } = await supabase
+            .from("mistake_entries")
+            .select("id, description")
+            .in("id", ids);
+          for (const r of data ?? []) {
+            const desc: string = r.description ?? "Mistake entry";
+            labelMap.set(
+              `${table}:${r.id}`,
+              desc.length > 50 ? desc.slice(0, 50) + "…" : desc
+            );
+          }
+          break;
+        }
+      }
+    } catch {
+      // fallback: IDs for this table get no entry, callers use default
+    }
+  });
+
+  await Promise.all(fetches);
+  return labelMap;
 }
 
 async function fetchLabel(
@@ -124,7 +217,7 @@ async function fetchLabel(
   }
 }
 
-export async function getRelatedRecords(
+export const getRelatedRecords = cache(async function getRelatedRecords(
   sourceTable: LinkableTable,
   sourceId: string
 ): Promise<RecordLink[]> {
@@ -162,33 +255,36 @@ export async function getRelatedRecords(
     return [];
   }
 
-  const results: RecordLink[] = [];
-
-  for (const link of links) {
+  // Collect items with resolved direction
+  const items = links.map((link) => {
     const isForward =
       link.source_table === sourceTable && link.source_id === sourceId;
+    const table = (
+      isForward ? link.target_table : link.source_table
+    ) as LinkableTable;
+    const id = isForward ? link.target_id : link.source_id;
+    return { table, id, link };
+  });
 
-    const targetTable = isForward
-      ? (link.target_table as LinkableTable)
-      : (link.source_table as LinkableTable);
-    const targetId = isForward ? link.target_id : link.source_id;
+  // Batch fetch all labels in parallel (one query per table type)
+  const labelMap = await fetchLabelsInBatch(
+    supabase,
+    items.map((i) => ({ table: i.table, id: i.id }))
+  );
 
-    const label = await fetchLabel(supabase, targetTable, targetId);
-    const href = tableToHref(targetTable, targetId);
-
-    results.push({
-      id: link.id,
-      target_table: targetTable,
-      target_id: targetId,
-      relation_type: (link.relation_type as RelationType) ?? null,
-      note: link.note,
-      label,
-      href,
-    });
-  }
+  // Map results
+  const results: RecordLink[] = items.map(({ table, id, link }) => ({
+    id: link.id,
+    target_table: table,
+    target_id: id,
+    relation_type: (link.relation_type as RelationType) ?? null,
+    note: link.note,
+    label: labelMap.get(`${table}:${id}`) ?? table.replace(/_/g, " "),
+    href: tableToHref(table, id),
+  }));
 
   return results;
-}
+});
 
 export async function createRecordLink(input: {
   source_table: LinkableTable;

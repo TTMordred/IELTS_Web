@@ -46,12 +46,27 @@ export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const lastFetchRef = useRef(0);
+  const cachedDataRef = useRef<ApiResponse | null>(null);
 
   const fetchNotifications = useCallback(async () => {
+    // Show cached data immediately (stale-while-revalidate)
+    if (cachedDataRef.current) {
+      setNotifications(cachedDataRef.current.notifications);
+      setUnreadCount(cachedDataRef.current.unreadCount);
+      setLoaded(true);
+    }
+
+    // Skip network if fresh enough
+    if (Date.now() - lastFetchRef.current < 60_000) return;
+
+    // Background fetch
     try {
       const res = await fetch("/api/notifications-data");
       if (!res.ok) return;
       const data: ApiResponse = await res.json();
+      cachedDataRef.current = data;
+      lastFetchRef.current = Date.now();
       setNotifications(data.notifications);
       setUnreadCount(data.unreadCount);
     } catch {

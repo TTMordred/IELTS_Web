@@ -2,10 +2,11 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { calculateReadinessScore } from "@/lib/readiness-score";
+import { getAuthUser } from "@/lib/supabase/cached-auth";
 
 export async function getReadinessData() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return null;
 
   // Fetch all type results for this user

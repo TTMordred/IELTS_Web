@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getAuthUser } from "@/lib/supabase/cached-auth";
 import { getLevel } from "@/lib/constants/gamification";
 import { Headphones, BookOpen, MessageSquare, PenTool, BookMarked, Plus } from "lucide-react";
 import { StreakCalendar } from "@/components/dashboard/streak-calendar";
@@ -15,7 +16,7 @@ import { WidgetSection } from "@/components/dashboard/widget-section";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
 
   if (!user) redirect("/auth");
 
@@ -34,7 +35,11 @@ export default async function DashboardPage() {
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
   const ninetyDaysAgoStr = ninetyDaysAgo.toISOString().slice(0, 10);
 
-  const [listening, reading, writing, speaking, vocab, activityResult, listeningBands, readingBands, writingBands, speakingBands] = await Promise.all([
+  // Forecast topics for current quarter
+  const currentQuarter = `Q${Math.ceil((new Date().getMonth() + 1) / 3)}/${new Date().getFullYear()}`;
+
+  // Single parallel block: counts + bands + activity + readiness + digest + forecast
+  const [listening, reading, writing, speaking, vocab, activityResult, listeningBands, readingBands, writingBands, speakingBands, readinessData, digestData, forecastResult] = await Promise.all([
     supabase.from("listening_records").select("id", { count: "exact", head: true }).eq("user_id", user.id),
     supabase.from("reading_records").select("id", { count: "exact", head: true }).eq("user_id", user.id),
     supabase.from("writing_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
@@ -45,6 +50,13 @@ export default async function DashboardPage() {
     supabase.from("reading_records").select("estimated_band").eq("user_id", user.id).not("estimated_band", "is", null),
     supabase.from("writing_entries").select("estimated_band").eq("user_id", user.id).not("estimated_band", "is", null),
     supabase.from("speaking_entries").select("estimated_band").eq("user_id", user.id).not("estimated_band", "is", null),
+    getReadinessData(),
+    getWeeklyDigest(),
+    supabase
+      .from("global_topics")
+      .select("name, part")
+      .eq("is_forecast", true)
+      .eq("forecast_quarter", currentQuarter),
   ]);
 
   function avgBand(rows: { estimated_band: number | null }[] | null): number {
@@ -66,19 +78,6 @@ export default async function DashboardPage() {
 
   const totalRecords = (listening.count || 0) + (reading.count || 0) + (writing.count || 0) + (speaking.count || 0);
   const level = getLevel(profile.total_xp || 0);
-  // Forecast topics for current quarter
-  const currentQuarter = `Q${Math.ceil((new Date().getMonth() + 1) / 3)}/${new Date().getFullYear()}`;
-
-  // Run remaining independent fetches in parallel instead of sequentially
-  const [readinessData, digestData, forecastResult] = await Promise.all([
-    getReadinessData(),
-    getWeeklyDigest(),
-    supabase
-      .from("global_topics")
-      .select("name, part")
-      .eq("is_forecast", true)
-      .eq("forecast_quarter", currentQuarter),
-  ]);
   const forecastTopics = forecastResult.data;
 
   // Days until exam (computed server-side, stable per request)
