@@ -356,19 +356,24 @@ Return ONLY valid JSON (no markdown, no code blocks):
   }
 }`;
 
-  const result = await model.generateContent({
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
-    generationConfig: { maxOutputTokens: 8192 },
-  });
-  const text = result.response.text();
-
-  let raw: Record<string, unknown>;
-  try {
-    raw = parseAIJson(text);
-  } catch (err) {
-    console.error("[AI Grade Writing] Failed to parse. First 500 chars:", text.slice(0, 500));
-    throw err;
+  // Retry up to 2 times — Gemini thinking models can produce non-deterministic output
+  let raw: Record<string, unknown> | null = null;
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: { maxOutputTokens: 8192 },
+    });
+    const text = result.response.text();
+    try {
+      raw = parseAIJson(text);
+      break;
+    } catch (err) {
+      console.error(`[AI Grade Writing] Attempt ${attempt + 1} parse failed. First 500 chars:`, text.slice(0, 500));
+      lastError = err;
+    }
   }
+  if (!raw) throw lastError;
 
   const ta = clampScore(raw.ta);
   const cc = clampScore(raw.cc);
