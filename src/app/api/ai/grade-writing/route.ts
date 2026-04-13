@@ -30,6 +30,7 @@ export async function POST(request: Request) {
       return NextResponse.json(result);
     } catch (err) {
       const message = err instanceof Error ? err.message : "AI grading failed";
+      console.error("[API grade-writing]", message);
       return NextResponse.json({ error: message }, { status: 500 });
     }
   }

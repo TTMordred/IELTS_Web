@@ -356,21 +356,29 @@ Return ONLY valid JSON (no markdown, no code blocks):
   }
 }`;
 
-  // Retry up to 2 times — Gemini thinking models can produce non-deterministic output
+  // Retry up to 3 times — Gemini thinking models can produce non-deterministic output
   let raw: Record<string, unknown> | null = null;
   let lastError: unknown = null;
-  for (let attempt = 0; attempt < 2; attempt++) {
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: { maxOutputTokens: 8192 },
-    });
-    const text = result.response.text();
+  for (let attempt = 0; attempt < 3; attempt++) {
     try {
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 8192 },
+      });
+
+      const text = result.response.text();
+      if (!text || text.trim().length === 0) {
+        console.error(`[AI Grade Writing] Attempt ${attempt + 1}: empty response`);
+        lastError = new Error("AI returned empty response");
+        continue;
+      }
+
       raw = parseAIJson(text);
       break;
     } catch (err) {
-      console.error(`[AI Grade Writing] Attempt ${attempt + 1} parse failed. First 500 chars:`, text.slice(0, 500));
-      lastError = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`[AI Grade Writing] Attempt ${attempt + 1} failed:`, msg);
+      lastError = err instanceof Error ? err : new Error(msg);
     }
   }
   if (!raw) throw lastError;
