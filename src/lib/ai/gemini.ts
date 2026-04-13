@@ -24,12 +24,31 @@ function safeStringArray(v: unknown): string[] {
 }
 
 function parseAIJson(text: string): Record<string, unknown> {
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("Failed to parse AI response");
+  // Strip markdown code fences if present
+  let cleaned = text.trim();
+  const fenceMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenceMatch) cleaned = fenceMatch[1].trim();
+
+  // Try direct parse first (works when responseMimeType is set)
   try {
-    return JSON.parse(jsonMatch[0]);
+    return JSON.parse(cleaned);
   } catch {
-    throw new Error("Invalid JSON in AI response");
+    // Fallback: extract outermost JSON object
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("Failed to parse AI response — no JSON object found");
+    try {
+      return JSON.parse(jsonMatch[0]);
+    } catch {
+      // Last resort: try fixing common issues (trailing commas)
+      const fixed = jsonMatch[0]
+        .replace(/,\s*([}\]])/g, "$1")  // remove trailing commas
+        .replace(/[\x00-\x1f]/g, (c) => c === "\n" || c === "\r" || c === "\t" ? c : ""); // remove control chars
+      try {
+        return JSON.parse(fixed);
+      } catch {
+        throw new Error("Invalid JSON in AI response");
+      }
+    }
   }
 }
 
@@ -204,7 +223,10 @@ export async function gradeWritingEssay(input: {
     throw new Error("Essay too long for AI grading (max 5000 chars)");
   }
 
-  const model = getClient().getGenerativeModel({ model: input.model ?? DEFAULT_MODEL });
+  const model = getClient().getGenerativeModel({
+    model: input.model ?? DEFAULT_MODEL,
+    generationConfig: { responseMimeType: "application/json" },
+  });
 
   const taskLabel = input.taskType === "task1" ? "Task 1" : "Task 2";
   const criterion1Name = input.taskType === "task1" ? "Task Achievement" : "Task Response";
