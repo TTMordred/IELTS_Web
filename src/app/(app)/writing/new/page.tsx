@@ -12,7 +12,7 @@ import {
   WRITING_TOPIC_CATEGORIES,
 } from "@/lib/constants/writing-types";
 import { createWritingEntry } from "../actions";
-import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, Loader2, Check } from "lucide-react";
 import { TeacherFeedbackPanel } from "@/components/writing/teacher-feedback-panel";
 import type { TeacherFeedback } from "@/lib/types";
 
@@ -316,7 +316,7 @@ export default function NewWritingEntryPage() {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="heading-sm">Criteria Scores (1–9)</h3>
-                <span className="text-sm font-mono font-semibold text-[#993556]">
+                <span className="text-sm font-mono font-semibold text-[var(--color-accent)]">
                   Band {estimatedBand.toFixed(1)}
                 </span>
               </div>
@@ -336,15 +336,12 @@ export default function NewWritingEntryPage() {
                     type="button"
                     onClick={handleAIGrade}
                     disabled={aiGrading || wordCount === 0}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-[#993556] text-white hover:bg-[#7a2944] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0 cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0 cursor-pointer"
                   >
                     {aiGrading ? (
                       <>
-                        <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                        Grading…
+                        <Loader2 className="animate-spin w-3.5 h-3.5" />
+                        Grading...
                       </>
                     ) : (
                       <>
@@ -356,8 +353,9 @@ export default function NewWritingEntryPage() {
                 </div>
 
                 {aiGraded && !aiGradeError && (
-                  <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                    ✓ AI graded — review and adjust scores before saving.
+                  <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                    <Check className="w-3.5 h-3.5" />
+                    AI graded — review and adjust scores before saving.
                   </p>
                 )}
                 {aiGradeError && (
@@ -387,8 +385,8 @@ export default function NewWritingEntryPage() {
                           onClick={() => setter(score)}
                           className={`flex-1 py-1.5 rounded text-xs font-mono font-medium transition-colors cursor-pointer ${
                             score <= value
-                              ? "bg-[#993556] text-white"
-                              : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:bg-[#993556]/20"
+                              ? "bg-[var(--color-accent)] text-white"
+                              : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:bg-[var(--color-accent)]/20"
                           }`}
                         >
                           {score}

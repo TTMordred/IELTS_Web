@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, Check, ArrowRight } from "lucide-react";
 import { saveAiGrading } from "@/app/(app)/writing/actions";
 import type { RichTeacherFeedback } from "@/lib/types";
 
@@ -98,30 +98,34 @@ export function AiGradeWriting({ entryId }: { entryId: string }) {
   }
 
   return (
-    <div className="card-base p-5 border-l-4" style={{ borderLeftColor: "#993556" }}>
+    <div className="card-base p-5 border-l-4" style={{ borderLeftColor: "var(--color-accent)" }}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="heading-md flex items-center gap-2">
-          <Sparkles className="w-4 h-4" style={{ color: "#993556" }} />
+          <Sparkles className="w-4 h-4" style={{ color: "var(--color-accent)" }} />
           AI Grade
         </h2>
         <button
           onClick={handleGrade}
           disabled={loading}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white transition-opacity disabled:opacity-60 cursor-pointer"
-          style={{ backgroundColor: "#993556" }}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white transition-colors disabled:opacity-60 cursor-pointer bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)]"
         >
           {loading ? (
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
             <Sparkles className="w-4 h-4" />
           )}
-          {loading ? "Grading…" : result ? "Re-grade" : "Grade with AI"}
+          {loading ? "Grading..." : result ? "Re-grade" : "Grade with AI"}
         </button>
       </div>
 
       {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
-      {saving && <p className="text-sm text-[var(--color-ink-muted)] mb-3">Saving…</p>}
-      {saved && <p className="text-sm text-green-500 mb-3">Saved ✓</p>}
+      {saving && <p className="text-sm text-[var(--color-ink-muted)] mb-3">Saving...</p>}
+      {saved && (
+        <p className="text-sm text-green-500 mb-3 flex items-center gap-1">
+          <Check className="w-3.5 h-3.5" />
+          Saved
+        </p>
+      )}
       {saveError && <p className="text-sm text-amber-500 mb-3">{saveError}</p>}
 
       {result ? (
@@ -175,7 +179,7 @@ export function AiGradeWriting({ entryId }: { entryId: string }) {
                     key={i}
                     className="text-sm text-[var(--color-ink-secondary)] flex items-start gap-2"
                   >
-                    <span className="text-green-500 shrink-0 mt-0.5">✓</span>
+                    <Check className="w-3.5 h-3.5 text-green-600 shrink-0 mt-0.5" />
                     {s}
                   </li>
                 ))}
@@ -195,7 +199,7 @@ export function AiGradeWriting({ entryId }: { entryId: string }) {
                     key={i}
                     className="text-sm text-[var(--color-ink-secondary)] flex items-start gap-2"
                   >
-                    <span className="text-amber-500 shrink-0 mt-0.5">→</span>
+                    <ArrowRight className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
                     {s}
                   </li>
                 ))}
