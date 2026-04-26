@@ -6,7 +6,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://langhub.mordred.site";
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.NODE_ENV === "production"
+    ? "https://langhub.mordred.site"
+    : "http://localhost:3000");
 
 function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
