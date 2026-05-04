@@ -75,6 +75,7 @@ create table if not exists public.writing_entries (
   topic text,
   topic_category text,
   question_text text,
+  image_url text,
   essay_content text,
   word_count integer,
   time_spent_min integer,

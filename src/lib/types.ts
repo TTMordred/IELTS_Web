@@ -186,6 +186,7 @@ export type WritingEntry = {
   topic: string | null;
   topic_category: string | null;
   question_text: string | null;
+  image_url?: string | null;
   essay_content: string | null;
   word_count: number | null;
   time_spent_min: number | null;

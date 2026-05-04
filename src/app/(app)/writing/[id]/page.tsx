@@ -166,6 +166,11 @@ export default async function WritingDetailPage({
           <p className="text-sm text-[var(--color-ink-secondary)] whitespace-pre-wrap leading-relaxed">
             {entry.question_text}
           </p>
+          {entry.image_url && (
+            <div className="mt-4">
+              <img src={entry.image_url} alt="Question image" className="max-h-72 w-auto rounded-md border" />
+            </div>
+          )}
         </div>
       )}
 

@@ -20,6 +20,7 @@ export type CreateWritingEntryInput = {
   lr_score: number;
   gra_score: number;
   feedback: string;
+  image_url?: string | null;
   teacher_feedback?: TeacherFeedback;
 };
 
@@ -49,6 +50,7 @@ export async function createWritingEntry(input: CreateWritingEntryInput) {
       topic: input.topic || null,
       topic_category: input.topic_category || null,
       question_text: input.question_text || null,
+      image_url: input.image_url || null,
       essay_content: input.essay_content || null,
       word_count,
       time_spent_min: input.time_spent_min || null,

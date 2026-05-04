@@ -12,6 +12,7 @@ import {
   WRITING_TOPIC_CATEGORIES,
 } from "@/lib/constants/writing-types";
 import { createWritingEntry } from "../actions";
+import { createClient as createBrowserSupabase } from "@/lib/supabase/client";
 import { ChevronLeft, ChevronRight, Sparkles, Loader2, Check } from "lucide-react";
 import { TeacherFeedbackPanel } from "@/components/writing/teacher-feedback-panel";
 import type { TeacherFeedback } from "@/lib/types";
@@ -50,6 +51,10 @@ export default function NewWritingEntryPage() {
   const [aiGraded, setAiGraded] = useState(false);
   const [aiGradeError, setAiGradeError] = useState<string | null>(null);
   const [teacherFeedback, setTeacherFeedback] = useState<TeacherFeedback | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const wordCount = countWords(essayContent);
   const estimatedBand = roundToHalf((taScore + ccScore + lrScore + graScore) / 4);
@@ -59,6 +64,30 @@ export default function NewWritingEntryPage() {
   function handleTaskTypeSwitch(type: "task1" | "task2") {
     setTaskType(type);
     setSubType("");
+  }
+
+  async function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadError(null);
+    setUploadingImage(true);
+    try {
+      const supabase = createBrowserSupabase();
+      const filename = `writing-images/${crypto.randomUUID()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("writing-images")
+        .upload(filename, file, { contentType: file.type });
+      if (uploadError) throw uploadError;
+      const { data: publicData } = supabase.storage
+        .from("writing-images")
+        .getPublicUrl(filename);
+      setImageUrl(publicData.publicUrl || null);
+      setImagePreview(URL.createObjectURL(file));
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploadingImage(false);
+    }
   }
 
   async function handleAIGrade() {
@@ -105,6 +134,7 @@ export default function NewWritingEntryPage() {
         topic,
         topic_category: topicCategory,
         question_text: questionText,
+        image_url: imageUrl ?? null,
         essay_content: essayContent,
         time_spent_min: timeSpentMin,
         ta_score: taScore,
@@ -263,6 +293,27 @@ export default function NewWritingEntryPage() {
               className="w-full px-3 py-2 rounded-lg border border-[var(--color-line)] bg-[var(--color-card)] text-[var(--color-ink)] text-sm placeholder:text-[var(--color-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[#993556] resize-y"
             />
           </div>
+
+          {taskType === "task1" && (
+            <div>
+              <label className="block text-sm font-medium text-[var(--color-ink)] mb-1.5">
+                Question Image (optional)
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  disabled={uploadingImage}
+                />
+                {uploadingImage && <span className="text-sm text-[var(--color-ink-muted)]">Uploading...</span>}
+                {uploadError && <span className="text-sm text-[var(--color-critical)]">{uploadError}</span>}
+              </div>
+              {imagePreview && (
+                <img src={imagePreview} alt="Preview" className="mt-3 max-h-40 rounded-md border" />
+              )}
+            </div>
+          )}
 
           <div className="flex justify-end">
             <Button
