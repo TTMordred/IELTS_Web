@@ -31,7 +31,7 @@ type ViewConfig = {
 const MODULE_COLORS: Record<string, string> = {
   listening: "#378ADD",
   reading: "#D85A30",
-  writing: "#993556",
+  writing: "#1B4D3E",
   speaking: "#1D9E75",
 };
 

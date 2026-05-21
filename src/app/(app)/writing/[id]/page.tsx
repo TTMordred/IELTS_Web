@@ -59,7 +59,7 @@ export default async function WritingDetailPage({
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <h1 className="heading-lg flex items-center gap-2">
-              <PenTool className="w-5 h-5 text-[#993556] shrink-0" />
+              <PenTool className="w-5 h-5 text-[#1B4D3E] shrink-0" />
               <InlineEditField
                 table="writing_entries"
                 id={entry.id}
@@ -188,7 +188,7 @@ export default async function WritingDetailPage({
       )}
 
       {/* Feedback */}
-      <div className="card-base p-5 border-l-4" style={{ borderLeftColor: "#993556" }}>
+      <div className="card-base p-5 border-l-4" style={{ borderLeftColor: "#1B4D3E" }}>
         <h2 className="heading-md mb-2">Feedback</h2>
         <RichEditField
           table="writing_entries"
@@ -215,7 +215,7 @@ export default async function WritingDetailPage({
           sourceTable="writing_entries"
           sourceId={entry.id}
           initialLinks={relatedLinks}
-          accentColor="#993556"
+          accentColor="#1B4D3E"
         />
       </div>
     </div>

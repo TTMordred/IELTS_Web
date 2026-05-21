@@ -67,7 +67,7 @@ export default async function AdminUserDetailPage({
           {([
             { label: "Listening", band: bands.listening, color: "#378ADD", count: listening.length },
             { label: "Reading", band: bands.reading, color: "#D85A30", count: reading.length },
-            { label: "Writing", band: bands.writing, color: "#993556", count: writing.length },
+            { label: "Writing", band: bands.writing, color: "#1B4D3E", count: writing.length },
             { label: "Speaking", band: bands.speaking, color: "#1D9E75", count: speaking.length },
           ] as const).map((s) => (
             <div key={s.label} className="text-center">
@@ -111,7 +111,7 @@ export default async function AdminUserDetailPage({
         <RecordList title="Listening Records" icon={<Headphones className="w-5 h-5 text-[#378ADD]" />} records={listening} module="listening" />
         <RecordList title="Reading Records" icon={<BookOpen className="w-5 h-5 text-[#D85A30]" />} records={reading} module="reading" />
         <RecordList title="Speaking Entries" icon={<MessageSquare className="w-5 h-5 text-[#1D9E75]" />} records={speaking} module="speaking" />
-        <RecordList title="Writing Entries" icon={<PenTool className="w-5 h-5 text-[#993556]" />} records={writing} module="writing" />
+        <RecordList title="Writing Entries" icon={<PenTool className="w-5 h-5 text-[#1B4D3E]" />} records={writing} module="writing" />
       </div>
     </div>
   );

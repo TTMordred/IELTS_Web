@@ -240,7 +240,13 @@ export default async function DashboardPage() {
 
 function StatCard({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="card-base p-4">
+    <div className="card-base p-4 relative overflow-hidden group hover:shadow-md transition-shadow">
+      <div className="absolute top-0 left-0 w-full h-0.5" style={{
+        background: accent
+          ? "linear-gradient(90deg, var(--color-accent), #4ADE80)"
+          : "linear-gradient(90deg, var(--color-accent), transparent)",
+        opacity: accent ? 1 : 0.3,
+      }} />
       <p className="section-label mb-1">{label}</p>
       <p className={`text-xl font-semibold font-mono ${accent ? "text-[var(--color-accent)]" : "text-[var(--color-ink)]"}`}>
         {value}
@@ -256,7 +262,10 @@ function ModuleCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="card-base p-4 flex flex-col gap-3">
+    <div className="card-base p-4 flex flex-col gap-3 relative overflow-hidden group hover:shadow-md transition-shadow">
+      <div className="absolute top-0 left-0 w-full h-0.5" style={{
+        background: `linear-gradient(90deg, ${color}, transparent)`,
+      }} />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2" style={{ color }}>
           {icon}
