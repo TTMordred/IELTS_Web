@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -199,7 +199,7 @@ export default function NewWritingEntryPage() {
             key={s}
             className="flex-1 h-1.5 rounded-full transition-colors"
             style={{
-              backgroundColor: s <= step ? "#993556" : "var(--color-line)",
+              backgroundColor: s <= step ? "#1B4D3E" : "var(--color-line)",
             }}
           />
         ))}
@@ -233,7 +233,7 @@ export default function NewWritingEntryPage() {
                 onClick={() => handleTaskTypeSwitch("task1")}
                 className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                   taskType === "task1"
-                    ? "bg-[#993556] text-white"
+                    ? "bg-[#1B4D3E] text-white"
                     : "bg-[var(--color-surface-hover)] text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)]"
                 }`}
               >
@@ -244,7 +244,7 @@ export default function NewWritingEntryPage() {
                 onClick={() => handleTaskTypeSwitch("task2")}
                 className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                   taskType === "task2"
-                    ? "bg-[#993556] text-white"
+                    ? "bg-[#1B4D3E] text-white"
                     : "bg-[var(--color-surface-hover)] text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)]"
                 }`}
               >
@@ -266,12 +266,12 @@ export default function NewWritingEntryPage() {
                   onClick={() => setSubType(st.name)}
                   className={`flex items-start gap-3 px-3 py-2.5 rounded-lg text-left text-sm transition-colors cursor-pointer border ${
                     subType === st.name
-                      ? "bg-[#993556]/10 border-[#993556] text-[var(--color-ink)]"
-                      : "bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink-secondary)] hover:border-[#993556]/50"
+                      ? "bg-[#1B4D3E]/10 border-[#1B4D3E] text-[var(--color-ink)]"
+                      : "bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink-secondary)] hover:border-[#1B4D3E]/50"
                   }`}
                 >
                   <span className={`w-4 h-4 rounded-full border-2 shrink-0 mt-0.5 flex items-center justify-center ${
-                    subType === st.name ? "border-[#993556] bg-[#993556]" : "border-[var(--color-line)]"
+                    subType === st.name ? "border-[#1B4D3E] bg-[#1B4D3E]" : "border-[var(--color-line)]"
                   }`}>
                     {subType === st.name && <span className="w-1.5 h-1.5 rounded-full bg-white block" />}
                   </span>
@@ -311,7 +311,7 @@ export default function NewWritingEntryPage() {
               onChange={(e) => setQuestionText(e.target.value)}
               rows={4}
               placeholder="Paste the full question or task prompt here..."
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-line)] bg-[var(--color-card)] text-[var(--color-ink)] text-sm placeholder:text-[var(--color-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[#993556] resize-y"
+              className="w-full px-3 py-2 rounded-lg border border-[var(--color-line)] bg-[var(--color-card)] text-[var(--color-ink)] text-sm placeholder:text-[var(--color-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[#1B4D3E] resize-y"
             />
           </div>
 

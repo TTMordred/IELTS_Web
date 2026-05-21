@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Check, Trash2, X } from "lucide-react";
@@ -17,7 +17,7 @@ const MODULE_COLORS: Record<string, string> = {
   listening: "#378ADD",
   reading: "#D85A30",
   speaking: "#1D9E75",
-  writing: "#993556",
+  writing: "#1B4D3E",
   vocab: "var(--color-accent)",
   grammar: "#7C3AED",
 };

@@ -1,4 +1,4 @@
-import { getAdminStats, getRecentActivity } from "./actions";
+﻿import { getAdminStats, getRecentActivity } from "./actions";
 import { Badge } from "@/components/ui/badge";
 import { Users, Headphones, BookOpen, PenTool, MessageSquare, BookMarked, Library, Activity, TrendingUp, TrendingDown, Zap, Flame } from "lucide-react";
 import Link from "next/link";
@@ -43,7 +43,7 @@ export default async function AdminPage() {
           {([
             { label: "Listening", band: stats.avgBands.listening, color: "#378ADD" },
             { label: "Reading", band: stats.avgBands.reading, color: "#D85A30" },
-            { label: "Writing", band: stats.avgBands.writing, color: "#993556" },
+            { label: "Writing", band: stats.avgBands.writing, color: "#1B4D3E" },
             { label: "Speaking", band: stats.avgBands.speaking, color: "#1D9E75" },
           ] as const).map((s) => (
             <div key={s.label} className="text-center">
@@ -59,7 +59,7 @@ export default async function AdminPage() {
         <StatCard icon={<Headphones className="w-5 h-5" />} label="Listening" value={stats.listeningRecords} color="#378ADD" />
         <StatCard icon={<BookOpen className="w-5 h-5" />} label="Reading" value={stats.readingRecords} color="#D85A30" />
         <StatCard icon={<MessageSquare className="w-5 h-5" />} label="Speaking" value={stats.speakingEntries} color="#1D9E75" />
-        <StatCard icon={<PenTool className="w-5 h-5" />} label="Writing" value={stats.writingEntries} color="#993556" />
+        <StatCard icon={<PenTool className="w-5 h-5" />} label="Writing" value={stats.writingEntries} color="#1B4D3E" />
       </div>
 
       {/* Row 4: Weakest & Strongest Types */}
@@ -148,7 +148,7 @@ export default async function AdminPage() {
           <div className="space-y-2">
             {recentActivity.map((entry) => {
               const moduleColors: Record<string, string> = {
-                listening: "#378ADD", reading: "#D85A30", speaking: "#1D9E75", writing: "#993556",
+                listening: "#378ADD", reading: "#D85A30", speaking: "#1D9E75", writing: "#1B4D3E",
               };
               return (
                 <div key={`${entry.module}-${entry.id}`} className="flex items-center gap-3 p-3 rounded-lg bg-[var(--color-surface-hover)]">

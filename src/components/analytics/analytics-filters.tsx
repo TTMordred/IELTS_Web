@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { createContext, useContext, useState } from "react";
 
@@ -62,7 +62,7 @@ const MODULE_OPTIONS: { value: ModuleFilter; label: string; color: string }[] = 
   { value: "all", label: "All", color: "var(--color-accent)" },
   { value: "listening", label: "Listening", color: "#378ADD" },
   { value: "reading", label: "Reading", color: "#D85A30" },
-  { value: "writing", label: "Writing", color: "#993556" },
+  { value: "writing", label: "Writing", color: "#1B4D3E" },
   { value: "speaking", label: "Speaking", color: "#1D9E75" },
 ];
 

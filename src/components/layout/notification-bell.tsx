@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Bell, BookMarked, Flame, PenTool, Trophy, X, CheckCheck } from "lucide-react";
@@ -31,7 +31,7 @@ const TYPE_META: Record<
   },
   writing_reminder: {
     icon: <PenTool className="w-4 h-4" />,
-    color: "#993556",
+    color: "#1B4D3E",
     href: "/writing/new",
   },
   achievement_unlocked: {

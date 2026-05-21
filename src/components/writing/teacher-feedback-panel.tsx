@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   Brain,
   LayoutTemplate,
@@ -45,7 +45,7 @@ const LEGACY_SECTIONS: {
   { key: "structure", label: "Essay Structure", Icon: LayoutTemplate, color: "#0ea5e9" },
   { key: "grammar", label: "Grammar", Icon: PenLine, color: "#f59e0b" },
   { key: "vocab", label: "Vocabulary", Icon: BookOpen, color: "#10b981" },
-  { key: "enhancement", label: "Improvements", Icon: Target, color: "#993556" },
+  { key: "enhancement", label: "Improvements", Icon: Target, color: "#1B4D3E" },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import {
@@ -35,7 +35,7 @@ const MODULE_COLORS: Record<string, string> = {
   Listening: "#378ADD",
   Reading: "#D85A30",
   Speaking: "#1D9E75",
-  Writing: "#993556",
+  Writing: "#1B4D3E",
 };
 
 const BADGE_ICON_MAP: Record<string, React.ReactNode> = {

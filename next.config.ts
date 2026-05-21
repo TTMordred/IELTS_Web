@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: resolve(import.meta.dirname!),
   },
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+    ],
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

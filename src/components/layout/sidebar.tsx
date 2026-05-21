@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -55,7 +55,7 @@ const navItems = [
     href: "/writing",
     icon: PenTool,
     enabled: true,
-    color: "#993556",
+    color: "#1B4D3E",
   },
   { type: "divider" as const },
   {

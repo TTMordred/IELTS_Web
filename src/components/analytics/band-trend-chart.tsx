@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   LineChart,
@@ -51,7 +51,7 @@ export function BandTrendChart({ data }: { data: TrendDataPoint[] }) {
         />
         <Line type="monotone" dataKey="listening" stroke="#378ADD" strokeWidth={2} dot={{ r: 3 }} connectNulls name="Listening" />
         <Line type="monotone" dataKey="reading" stroke="#D85A30" strokeWidth={2} dot={{ r: 3 }} connectNulls name="Reading" />
-        <Line type="monotone" dataKey="writing" stroke="#993556" strokeWidth={2} dot={{ r: 3 }} connectNulls name="Writing" />
+        <Line type="monotone" dataKey="writing" stroke="#1B4D3E" strokeWidth={2} dot={{ r: 3 }} connectNulls name="Writing" />
         <Line type="monotone" dataKey="speaking" stroke="#1D9E75" strokeWidth={2} dot={{ r: 3 }} connectNulls name="Speaking" />
       </LineChart>
     </ResponsiveContainer>

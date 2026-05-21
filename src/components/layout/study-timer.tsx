@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { logStudyTime } from "@/app/(app)/timer/actions";
@@ -39,7 +39,7 @@ const MODULE_COLORS: Record<string, string> = {
   listening: "#378ADD",
   reading: "#D85A30",
   speaking: "#1D9E75",
-  writing: "#993556",
+  writing: "#1B4D3E",
   vocab: "#7C5CDB",
   grammar: "#2A9D8F",
 };

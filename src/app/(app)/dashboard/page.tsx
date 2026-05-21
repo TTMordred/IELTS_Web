@@ -88,23 +88,40 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      {/* Header + Level */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="heading-lg">
-            Welcome back, <span className="text-accent">{profile.display_name}</span>
-          </h1>
-          <p className="text-[var(--color-ink-secondary)] mt-1">
-            Track your IELTS progress
-          </p>
-        </div>
-        <div className="card-base px-4 py-2 text-center shrink-0">
-          <p className="text-xs text-[var(--color-ink-muted)]">{level.title}</p>
-          <p className="text-lg font-bold font-mono text-[var(--color-accent)]">Lv.{level.level}</p>
-          <div className="w-20 h-1.5 rounded-full bg-[var(--color-line)] mt-1 overflow-hidden">
-            <div className="h-full rounded-full bg-[var(--color-accent)]" style={{ width: `${level.progress}%` }} />
+      {/* Welcome Banner */}
+      <div className="relative overflow-hidden rounded-2xl p-6 sm:p-8" style={{
+        background: "linear-gradient(135deg, #0a1a14 0%, #1B4D3E 50%, #163F33 100%)",
+      }}>
+        {/* Decorative dot pattern */}
+        <div className="absolute top-0 right-0 w-48 h-48 opacity-10" style={{
+          backgroundImage: "radial-gradient(circle, rgba(74,222,128,0.6) 1px, transparent 1px)",
+          backgroundSize: "14px 14px",
+        }} />
+        {/* Decorative gradient blob */}
+        <div className="absolute -bottom-12 -right-12 w-48 h-48 rounded-full opacity-20" style={{
+          background: "radial-gradient(circle, #4ADE80 0%, transparent 70%)",
+        }} />
+
+        <div className="relative z-10 flex items-start justify-between">
+          <div className="space-y-2">
+            <p className="text-emerald-300/70 text-sm font-medium tracking-wide uppercase">Welcome back</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
+              {profile.display_name}
+            </h1>
+            <p className="text-white/60 text-sm max-w-md">
+              {daysUntilExam !== null && daysUntilExam <= 60
+                ? `${daysUntilExam} days until your exam. Keep up the momentum!`
+                : "Track your IELTS progress and reach your target band."}
+            </p>
           </div>
-          <p className="text-[0.6rem] text-[var(--color-ink-muted)] mt-0.5">{profile.total_xp} XP</p>
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 text-center shrink-0 border border-white/10">
+            <p className="text-xs text-white/50">{level.title}</p>
+            <p className="text-lg font-bold font-mono text-emerald-300">Lv.{level.level}</p>
+            <div className="w-20 h-1.5 rounded-full bg-white/10 mt-1 overflow-hidden">
+              <div className="h-full rounded-full bg-emerald-400" style={{ width: `${level.progress}%` }} />
+            </div>
+            <p className="text-[0.6rem] text-white/40 mt-0.5">{profile.total_xp} XP</p>
+          </div>
         </div>
       </div>
 
@@ -185,7 +202,7 @@ export default async function DashboardPage() {
           count={writing.count || 0}
           href="/writing"
           newHref="/writing/new"
-          color="#993556"
+          color="#1B4D3E"
           icon={<PenTool className="w-5 h-5" />}
         />
       </div>

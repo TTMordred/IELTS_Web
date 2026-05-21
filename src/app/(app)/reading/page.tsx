@@ -4,34 +4,49 @@ import { Badge } from "@/components/ui/badge";
 import { DeleteRecordButton } from "@/components/ui/delete-record-button";
 import { bandToColor } from "@/lib/constants/band-tables";
 import { BookOpen, Plus } from "lucide-react";
+import { ReadingIllustration } from "@/components/ui/module-illustrations";
 
 export default async function ReadingPage() {
   const records = await getReadingRecords();
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="heading-lg flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-[#D85A30]" />
-            Reading Records
-          </h1>
-          <p className="text-[var(--color-ink-secondary)] mt-1">
-            {records.length} records logged
-          </p>
+      {/* Module Header */}
+      <div className="relative overflow-hidden rounded-2xl p-6" style={{
+        background: "linear-gradient(135deg, #7a2e14 0%, #D85A30 60%, #e07a54 100%)",
+      }}>
+        <div className="absolute top-0 right-0 w-40 h-40 opacity-10" style={{
+          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px)",
+          backgroundSize: "12px 12px",
+        }} />
+        <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full opacity-15" style={{
+          background: "radial-gradient(circle, #ffffff 0%, transparent 70%)",
+        }} />
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10">
+              <BookOpen className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">Reading Records</h1>
+              <p className="text-white/60 text-sm mt-0.5">
+                {records.length} {records.length === 1 ? "record" : "records"} logged
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/reading/new"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/15 backdrop-blur-sm text-white font-medium text-sm hover:bg-white/25 transition-colors cursor-pointer border border-white/10"
+          >
+            <Plus className="w-4 h-4" />
+            New Record
+          </Link>
         </div>
-        <Link
-          href="/reading/new"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--color-accent)] text-white font-medium text-sm hover:bg-[var(--color-accent-hover)] transition-colors cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          New Record
-        </Link>
       </div>
 
       {records.length === 0 ? (
         <div className="card-base p-12 text-center">
-          <BookOpen className="w-10 h-10 text-[var(--color-ink-muted)] mx-auto mb-4" />
+          <ReadingIllustration className="w-48 h-36 mx-auto mb-2" />
           <h2 className="heading-md mb-2">No reading records yet</h2>
           <p className="text-[var(--color-ink-muted)] mb-6">
             Log your first reading test to start tracking progress

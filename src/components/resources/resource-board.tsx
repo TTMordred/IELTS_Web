@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ const MODULE_COLORS: Record<string, string> = {
   listening: "#378ADD",
   reading: "#D85A30",
   speaking: "#1D9E75",
-  writing: "#993556",
+  writing: "#1B4D3E",
   general: "var(--color-accent)",
 };
 

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+﻿import { createClient } from "@/lib/supabase/server";
 import { BandTrendChart } from "@/components/analytics/band-trend-chart";
 import { SkillRadar } from "@/components/analytics/skill-radar";
 import { Recommendations } from "@/components/analytics/recommendations";
@@ -101,7 +101,7 @@ export default async function AnalyticsPage() {
         {([
           { label: "Listening", band: skillBands.listening, color: "#378ADD" },
           { label: "Reading", band: skillBands.reading, color: "#D85A30" },
-          { label: "Writing", band: skillBands.writing, color: "#993556" },
+          { label: "Writing", band: skillBands.writing, color: "#1B4D3E" },
           { label: "Speaking", band: skillBands.speaking, color: "#1D9E75" },
         ] as const).map((skill) => (
           <div key={skill.label} className="card-base p-4 text-center">

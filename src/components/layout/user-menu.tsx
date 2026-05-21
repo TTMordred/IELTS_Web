@@ -44,8 +44,12 @@ export function UserMenu({ user, profile }: UserMenuProps) {
     try {
       await logout();
     } catch (error) {
-      console.error("Logout failed:", error);
-      setIsLoading(false);
+      if (error instanceof Error) {
+        console.error("Logout failed:", error);
+        setIsLoading(false);
+        return;
+      }
+      throw error;
     }
   }
 

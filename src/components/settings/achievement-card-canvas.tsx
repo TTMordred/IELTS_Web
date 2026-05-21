@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useEffect, useState } from "react";
 import { Download, Copy, Check } from "lucide-react";
@@ -7,7 +7,7 @@ import type { AchievementCardData } from "@/app/(app)/settings/share-actions";
 const W = 1200;
 const H = 630;
 
-const MODULE_COLORS = ["#378ADD", "#D85A30", "#993556", "#1D9E75"];
+const MODULE_COLORS = ["#378ADD", "#D85A30", "#1B4D3E", "#1D9E75"];
 const MODULE_LABELS = ["Listening", "Reading", "Writing", "Speaking"];
 
 function drawCard(ctx: CanvasRenderingContext2D, data: AchievementCardData) {

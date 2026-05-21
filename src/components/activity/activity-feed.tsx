@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
@@ -21,7 +21,7 @@ const MODULE_META: Record<
 > = {
   listening: { label: "Listening", icon: Headphones, color: "#378ADD", bg: "bg-blue-500/10" },
   reading: { label: "Reading", icon: BookOpen, color: "#D85A30", bg: "bg-orange-500/10" },
-  writing: { label: "Writing", icon: PenTool, color: "#993556", bg: "bg-pink-500/10" },
+  writing: { label: "Writing", icon: PenTool, color: "#1B4D3E", bg: "bg-pink-500/10" },
   speaking: { label: "Speaking", icon: MessageSquare, color: "#1D9E75", bg: "bg-emerald-500/10" },
   vocab: { label: "Vocab", icon: BookMarked, color: "#7C3AED", bg: "bg-purple-500/10" },
   grammar: { label: "Grammar", icon: BookOpen, color: "#B45309", bg: "bg-amber-500/10" },

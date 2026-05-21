@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import { getExportData, ExportData } from "../export-actions";
@@ -56,7 +56,7 @@ function PrintReport({
   const modules = [
     { id: "listening" as SectionId, label: "Listening", summary: data.listening, color: "#378ADD" },
     { id: "reading" as SectionId, label: "Reading", summary: data.reading, color: "#D85A30" },
-    { id: "writing" as SectionId, label: "Writing", summary: data.writing, color: "#993556" },
+    { id: "writing" as SectionId, label: "Writing", summary: data.writing, color: "#1B4D3E" },
     { id: "speaking" as SectionId, label: "Speaking", summary: data.speaking, color: "#1D9E75" },
   ];
 

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+﻿import { createClient } from "@/lib/supabase/server";
 import { WRITING_TASK1_TYPES, WRITING_TASK2_TYPES } from "@/lib/constants/writing-types";
 import { PenTool } from "lucide-react";
 import Link from "next/link";
@@ -65,7 +65,7 @@ export default async function WritingHeatmapPage() {
     <div className="space-y-6 animate-fade-in-up">
       <div>
         <h1 className="heading-lg flex items-center gap-2">
-          <PenTool className="w-6 h-6 text-[#993556]" />
+          <PenTool className="w-6 h-6 text-[#1B4D3E]" />
           Writing Heatmap
         </h1>
         <p className="text-[var(--color-ink-secondary)] mt-1">
@@ -98,7 +98,7 @@ export default async function WritingHeatmapPage() {
         {groups.map(({ label, types }) => (
           <div key={label} className="card-base p-5">
             <h2 className="heading-sm mb-3">
-              <span className="text-[#993556]">{label}</span>
+              <span className="text-[#1B4D3E]">{label}</span>
             </h2>
             <div className="grid gap-2">
               {types.map((type) => {
