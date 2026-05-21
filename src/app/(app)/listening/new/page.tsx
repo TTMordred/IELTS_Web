@@ -81,8 +81,12 @@ export default function NewListeningRecordPage() {
         sections: submittedSections,
       });
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to save");
-      setLoading(false);
+      if (err instanceof Error) {
+        setError(err.message || "Failed to save");
+        setLoading(false);
+        return;
+      }
+      throw err;
     }
   }
 

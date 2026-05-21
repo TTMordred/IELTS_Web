@@ -155,6 +155,8 @@ function MultipleChoiceQuestion({
   const [selected, setSelected] = useState<string | null>(null);
   const [state, setState] = useState<MCState>("idle");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onAnswerRef = useRef(onAnswer);
+  onAnswerRef.current = onAnswer;
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -186,7 +188,7 @@ function MultipleChoiceQuestion({
     setState(isCorrect ? "correct" : "wrong");
 
     timerRef.current = setTimeout(() => {
-      onAnswer(isCorrect);
+      onAnswerRef.current(isCorrect);
     }, 1200);
   }
 
@@ -369,22 +371,30 @@ export function QuizSession({ cards, mode, onComplete }: Props) {
   const total = cards.length;
   const card = cards[currentIndex];
 
+  const indexRef = useRef(currentIndex);
+  useEffect(() => { indexRef.current = currentIndex; }, [currentIndex]);
+  const statsRef = useRef(stats);
+  useEffect(() => { statsRef.current = stats; }, [stats]);
+
   const handleAnswer = useCallback(
     async (isCorrect: boolean) => {
+      const cur = indexRef.current;
+      const prev = statsRef.current;
       const newStats = {
-        correct: stats.correct + (isCorrect ? 1 : 0),
-        wrong: stats.wrong + (isCorrect ? 0 : 1),
-        total: stats.total + 1,
+        correct: prev.correct + (isCorrect ? 1 : 0),
+        wrong: prev.wrong + (isCorrect ? 0 : 1),
+        total: prev.total + 1,
       };
       setStats(newStats);
 
+      const currentCard = cards[cur];
       try {
-        if (card) await reviewVocabCard(card.id, isCorrect);
+        if (currentCard) await reviewVocabCard(currentCard.id, isCorrect);
       } catch {
         // non-blocking
       }
 
-      if (currentIndex + 1 >= total) {
+      if (cur + 1 >= total) {
         setDone(true);
         onComplete(newStats);
       } else {
@@ -392,7 +402,7 @@ export function QuizSession({ cards, mode, onComplete }: Props) {
         setQuestionKey((k) => k + 1);
       }
     },
-    [card, currentIndex, total, stats, onComplete]
+    [cards, total, onComplete]
   );
 
   const handleReplay = useCallback(() => {
@@ -420,7 +430,7 @@ export function QuizSession({ cards, mode, onComplete }: Props) {
     );
   }
 
-  if (done) {
+  if (done || !card) {
     return <CompletionScreen stats={stats} onReplay={handleReplay} />;
   }
 

@@ -76,8 +76,12 @@ export default function NewReadingRecordPage() {
         passages,
       });
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to save");
-      setLoading(false);
+      if (err instanceof Error) {
+        setError(err.message || "Failed to save");
+        setLoading(false);
+        return;
+      }
+      throw err;
     }
   }
 
@@ -312,7 +316,7 @@ export default function NewReadingRecordPage() {
                               qt.frequency === "medium" ? "bg-amber-500/10 text-amber-600" :
                               "bg-blue-500/10 text-blue-500"
                             }`}>
-                              {qt.frequency === "high" ? "cao" : qt.frequency === "medium" ? "tb" : "thấp"}
+                              {qt.frequency === "high" ? "high" : qt.frequency === "medium" ? "med" : "low"}
                             </span>
                           </button>
 

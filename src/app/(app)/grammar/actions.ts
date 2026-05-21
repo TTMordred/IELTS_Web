@@ -42,6 +42,7 @@ export async function addGrammarNote(input: {
     correct_examples: input.correct_examples.filter(Boolean),
     common_mistakes: input.common_mistakes.filter(Boolean),
     source: input.source || null,
+    mastery_level: 0,
   });
 
   if (error) throw error;

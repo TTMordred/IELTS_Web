@@ -16,6 +16,7 @@ export function GrammarBoard({ initialNotes }: { initialNotes: GrammarNote[] }) 
   const [expandedCat, setExpandedCat] = useState<string | null>(null);
   const [showForm, setShowForm] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
 
   const [rule, setRule] = useState("");
   const [examples, setExamples] = useState(["", "", ""]);
@@ -34,6 +35,7 @@ export function GrammarBoard({ initialNotes }: { initialNotes: GrammarNote[] }) 
     const ruleText = rule.replace(/<[^>]*>/g, "").trim();
     if (!ruleText) return;
     setLoading(true);
+    setAddError(null);
     try {
       await addGrammarNote({
         category,
@@ -58,7 +60,7 @@ export function GrammarBoard({ initialNotes }: { initialNotes: GrammarNote[] }) 
       ]);
       resetForm();
     } catch (err) {
-      console.error(err);
+      setAddError(err instanceof Error ? err.message : "Failed to save note");
     } finally {
       setLoading(false);
     }
@@ -211,6 +213,9 @@ export function GrammarBoard({ initialNotes }: { initialNotes: GrammarNote[] }) 
                       onChange={(e) => setSource(e.target.value)}
                       placeholder="e.g. Cambridge 18, Writing T2"
                     />
+                    {addError && (
+                      <p className="text-sm text-red-500 bg-red-500/10 rounded-md px-3 py-2">{addError}</p>
+                    )}
                     <div className="flex justify-end">
                       <Button onClick={() => handleAdd(cat.id)} variant="primary" loading={loading}>
                         Save Note

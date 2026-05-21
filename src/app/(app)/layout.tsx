@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
 import { getAuthUser } from "@/lib/supabase/cached-auth";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({
   children,
@@ -13,5 +14,13 @@ export default async function AppLayout({
     redirect("/auth");
   }
 
-  return <AppShell>{children}</AppShell>;
+  // Fetch user profile
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, display_name")
+    .eq("id", user.id)
+    .single();
+
+  return <AppShell user={user} profile={profile}>{children}</AppShell>;
 }

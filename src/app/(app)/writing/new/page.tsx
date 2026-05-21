@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import {
 } from "@/lib/constants/writing-types";
 import { createWritingEntry } from "../actions";
 import { createClient as createBrowserSupabase } from "@/lib/supabase/client";
-import { ChevronLeft, ChevronRight, Sparkles, Loader2, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, Loader2, Check, UploadCloud, X } from "lucide-react";
 import { TeacherFeedbackPanel } from "@/components/writing/teacher-feedback-panel";
 import type { TeacherFeedback } from "@/lib/types";
 
@@ -28,6 +28,7 @@ function roundToHalf(value: number): number {
 
 export default function NewWritingEntryPage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,6 +88,26 @@ export default function NewWritingEntryPage() {
       setUploadError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploadingImage(false);
+    }
+  }
+
+  function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.currentTarget.classList.add("bg-[var(--color-accent)]/5", "border-[var(--color-accent)]");
+  }
+
+  function handleDragLeave(e: React.DragEvent<HTMLDivElement>) {
+    e.currentTarget.classList.remove("bg-[var(--color-accent)]/5", "border-[var(--color-accent)]");
+  }
+
+  function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.currentTarget.classList.remove("bg-[var(--color-accent)]/5", "border-[var(--color-accent)]");
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      handleImageSelect({ target: { files: e.dataTransfer.files } } as any);
+    } else {
+      setUploadError("Please drop an image file");
     }
   }
 
@@ -295,22 +316,72 @@ export default function NewWritingEntryPage() {
           </div>
 
           {taskType === "task1" && (
-            <div>
-              <label className="block text-sm font-medium text-[var(--color-ink)] mb-1.5">
-                Question Image (optional)
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-[var(--color-ink)]">
+                Question Image <span className="text-[var(--color-ink-muted)]">(optional)</span>
               </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageSelect}
-                  disabled={uploadingImage}
-                />
-                {uploadingImage && <span className="text-sm text-[var(--color-ink-muted)]">Uploading...</span>}
-                {uploadError && <span className="text-sm text-[var(--color-critical)]">{uploadError}</span>}
-              </div>
-              {imagePreview && (
-                <img src={imagePreview} alt="Preview" className="mt-3 max-h-40 rounded-md border" />
+
+              {!imagePreview ? (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className="relative border-2 border-dashed border-[var(--color-line)] rounded-lg p-8 text-center transition-colors cursor-pointer hover:border-[var(--color-accent)] hover:bg-[var(--color-accent)]/5"
+                >
+                  <div className="flex flex-col items-center gap-3">
+                    <UploadCloud className="w-10 h-10 text-[var(--color-accent)]" />
+                    <div>
+                      <p className="font-medium text-[var(--color-ink)]">Upload diagram or chart image</p>
+                      <p className="text-xs text-[var(--color-ink-muted)] mt-1">
+                        Drag and drop or click to select
+                      </p>
+                    </div>
+                    {uploadingImage && (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-[var(--color-accent)]" />
+                        <span className="text-sm text-[var(--color-ink-muted)]">Uploading...</span>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    disabled={uploadingImage}
+                    className="hidden"
+                  />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="relative rounded-lg overflow-hidden bg-[var(--color-surface-hover)] border border-[var(--color-line)]">
+                    <img src={imagePreview} alt="Question preview" className="w-full h-auto max-h-64 object-cover" />
+                    <button
+                      onClick={() => {
+                        setImagePreview(null);
+                        setImageUrl(null);
+                        if (fileInputRef.current) fileInputRef.current.value = "";
+                      }}
+                      className="absolute top-2 right-2 p-1.5 bg-[var(--color-critical)] hover:bg-red-600 text-white rounded-lg transition-colors cursor-pointer"
+                      title="Remove image"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-sm text-[var(--color-accent)] hover:underline cursor-pointer"
+                  >
+                    Change image
+                  </button>
+                </div>
+              )}
+
+              {uploadError && (
+                <p className="text-sm text-[var(--color-critical)] bg-red-500/10 rounded-lg px-3 py-2">
+                  {uploadError}
+                </p>
               )}
             </div>
           )}

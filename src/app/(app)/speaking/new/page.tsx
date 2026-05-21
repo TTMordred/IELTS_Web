@@ -193,9 +193,13 @@ export default function NewSpeakingEntryPage() {
         recording_url: recordingPath ?? null,
       });
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to save");
-      setUploading(false);
-      setLoading(false);
+      if (err instanceof Error) {
+        setError(err.message || "Failed to save");
+        setUploading(false);
+        setLoading(false);
+        return;
+      }
+      throw err;
     }
   }
 

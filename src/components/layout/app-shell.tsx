@@ -8,9 +8,17 @@ import { CommandPalette } from "@/components/layout/command-palette";
 import { StudyTimer } from "@/components/layout/study-timer";
 import { FocusModeToggle, useFocusMode } from "@/components/layout/focus-mode";
 import { DashboardToggles } from "@/components/dashboard/dashboard-toggles";
+import { UserMenu } from "@/components/layout/user-menu";
 import { usePathname } from "next/navigation";
+import type { User } from "@supabase/supabase-js";
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+interface AppShellProps {
+  children: React.ReactNode;
+  user?: User | null;
+  profile?: { id: string; display_name?: string } | null;
+}
+
+export function AppShell({ children, user, profile }: AppShellProps) {
   const { focused, toggle } = useFocusMode();
   const pathname = usePathname();
   const isDashboard = pathname === "/dashboard";
@@ -30,6 +38,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <NotificationBell />
               <FocusModeToggle focused={focused} toggle={toggle} />
               <ThemeToggle />
+              <UserMenu user={user || null} profile={profile || undefined} />
             </div>
           </header>
         )}
