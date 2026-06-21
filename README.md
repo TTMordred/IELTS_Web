@@ -61,7 +61,9 @@ All-in-one tracking, notes, and analytics platform for IELTS self-study.
    supabase/schema-2.2.sql
    supabase/schema-2.3.sql
    supabase/schema-2.4.sql
+   supabase/schema-2.5.sql
    supabase/schema-notifications.sql
+   supabase/writing-image-upload.sql
    supabase/seed-forecast-q2-2026.sql
    ```
 
