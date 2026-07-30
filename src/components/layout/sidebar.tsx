@@ -19,6 +19,7 @@ import {
   Activity,
   Users,
   MessageSquareCode,
+  BookOpenText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -80,6 +81,12 @@ const navItems = [
     label: "Grammar",
     href: "/grammar",
     icon: BookOpen,
+    enabled: true,
+  },
+  {
+    label: "Phrase Bank",
+    href: "/phrase-bank",
+    icon: BookOpenText,
     enabled: true,
   },
   {

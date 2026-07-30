@@ -26,6 +26,7 @@ create policy "Users can update own profile" on public.profiles for update using
 create table if not exists public.listening_records (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
+  name text check (name is null or (btrim(name) <> '' and char_length(name) <= 120)),
   date date not null default current_date,
   source text not null default 'other',
   test_name text not null default '',
@@ -239,11 +240,12 @@ create table if not exists public.speaking_entries (
   date date not null default current_date,
   type text not null default 'practice',
   estimated_band decimal(2,1),
-  fluency_score integer check (fluency_score >= 1 and fluency_score <= 9),
-  lexical_score integer check (lexical_score >= 1 and lexical_score <= 9),
-  grammar_score integer check (grammar_score >= 1 and grammar_score <= 9),
-  pronunciation_score integer check (pronunciation_score >= 1 and pronunciation_score <= 9),
+  fluency_score decimal(2,1) check (fluency_score >= 1 and fluency_score <= 9),
+  lexical_score decimal(2,1) check (lexical_score >= 1 and lexical_score <= 9),
+  grammar_score decimal(2,1) check (grammar_score >= 1 and grammar_score <= 9),
+  pronunciation_score decimal(2,1) check (pronunciation_score >= 1 and pronunciation_score <= 9),
   reflection text,
+  recording_url text,
   created_at timestamptz not null default now()
 );
 

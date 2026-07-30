@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { speakingRecordLabel } from "@/lib/speaking/record-name";
 
 export type SearchResultItem = {
   id: string;
@@ -94,9 +95,9 @@ export async function globalSearch(query: string): Promise<SearchResults> {
 
     supabase
       .from("speaking_entries")
-      .select("id, date, type")
+      .select("id, name, date, type")
       .eq("user_id", user.id)
-      .or(`date.ilike.%${q}%,type.ilike.%${q}%`)
+      .or(`name.ilike.%${q}%,date.ilike.%${q}%,type.ilike.%${q}%`)
       .limit(5),
 
     supabase
@@ -150,9 +151,9 @@ export async function globalSearch(query: string): Promise<SearchResults> {
     speaking: (speakingRes.data || []).map((r) => ({
       id: r.id,
       type: "speaking" as const,
-      title: `${r.type || "Speaking"} · ${r.date}`,
+      title: speakingRecordLabel(r.name, r.type, r.date),
       subtitle: r.date,
-      href: `/speaking`,
+      href: `/speaking/${r.id}`,
     })),
 
     topics: (topicsRes.data || []).map((r) => ({

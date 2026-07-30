@@ -8,15 +8,15 @@ import { Select } from "@/components/ui/select";
 import {
   SPEAKING_CRITERIA,
   SPEAKING_ENTRY_TYPES,
-  SPEAKING_PART1_TOPICS,
-  SPEAKING_PART2_CATEGORIES,
 } from "@/lib/constants/speaking-types";
 import { createSpeakingEntry, type PartDetailInput } from "../actions";
 import { createClient } from "@/lib/supabase/client";
-import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ForecastBanner } from "@/components/dashboard/forecast-banner";
 import { SpeakingRecorder } from "@/components/speaking/speaking-recorder";
 import { uploadSpeakingRecording } from "@/lib/storage/speaking-recordings";
+import { Part1Notebook, type TopicBankItem } from "@/components/speaking/part1-notebook";
+import type { NewRecordNotebookQuestion } from "@/lib/speaking/notebook-validation";
 
 const MODULE_COLOR = "#1D9E75";
 
@@ -66,6 +66,7 @@ export default function NewSpeakingEntryPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Step 1 fields
+  const [name, setName] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [entryType, setEntryType] = useState<"practice" | "mock_test" | "real_test">("practice");
   const [fluency, setFluency] = useState(0);
@@ -73,13 +74,7 @@ export default function NewSpeakingEntryPage() {
   const [grammar, setGrammar] = useState(0);
   const [pronunciation, setPronunciation] = useState(0);
 
-  // Step 2 fields — one per part
-  const [part1Topics, setPart1Topics] = useState<string[]>([]);
-  const [part2Topic, setPart2Topic] = useState("");
-  const [part2Category, setPart2Category] = useState("");
-  const [part3Notes, setPart3Notes] = useState("");
-
-  // Step 3 reflection
+  // Step 2 reflection
   const [reflection, setReflection] = useState("");
 
   // Recording state
@@ -89,53 +84,37 @@ export default function NewSpeakingEntryPage() {
   const [uploading, setUploading] = useState(false);
 
   // DB-backed topics (fallback to hardcoded constants)
-  const [dbPart1Topics, setDbPart1Topics] = useState<string[]>([]);
-  const [dbPart2Categories, setDbPart2Categories] = useState<{ id: string; name: string; is_forecast: boolean; forecast_quarter: string | null }[]>([]);
-  const [topicsLoaded, setTopicsLoaded] = useState(false);
-
-  // Forecast filter
-  const [forecastOnly, setForecastOnly] = useState(false);
+  const [dbPart1Topics, setDbPart1Topics] = useState<TopicBankItem[]>([]);
+  const [dbPart2Topics, setDbPart2Topics] = useState<TopicBankItem[]>([]);
+  const [part1Draft, setPart1Draft] = useState<NewRecordNotebookQuestion[]>([]);
+  const [part2Draft, setPart2Draft] = useState<NewRecordNotebookQuestion[]>([]);
+  const [part3Draft, setPart3Draft] = useState<NewRecordNotebookQuestion[]>([]);
 
   useEffect(() => {
     const supabase = createClient();
     Promise.all([
-      supabase.from("global_topics").select("name, is_forecast").eq("module", "speaking").eq("part", 1).order("name"),
-      supabase.from("global_topics").select("id, name, category, is_forecast, forecast_quarter").eq("module", "speaking").eq("part", 2).order("name"),
+      supabase.from("global_topics").select("id, name, sample_questions").eq("module", "speaking").eq("part", 1).order("name"),
+      supabase.from("global_topics").select("id, name, sample_questions, is_forecast, forecast_quarter").eq("module", "speaking").eq("part", 2).order("name"),
     ]).then(([p1, p2]) => {
       if (p1.data && p1.data.length > 0) {
-        setDbPart1Topics(p1.data.map((t) => t.name));
+        setDbPart1Topics(p1.data);
       }
       if (p2.data && p2.data.length > 0) {
-        setDbPart2Categories(p2.data.map((t) => ({ id: t.id, name: t.name, is_forecast: t.is_forecast, forecast_quarter: t.forecast_quarter ?? null })));
+        setDbPart2Topics(p2.data);
       }
-      setTopicsLoaded(true);
     });
   }, []);
 
-  const activePart1Topics = dbPart1Topics.length > 0 ? dbPart1Topics : [...SPEAKING_PART1_TOPICS];
-
-  const allPart2Cats = dbPart2Categories.length > 0
-    ? dbPart2Categories.map((c) => ({ id: c.id, name: c.name, examples: "", is_forecast: c.is_forecast, forecast_quarter: c.forecast_quarter }))
-    : SPEAKING_PART2_CATEGORIES.map((c) => ({ ...c, is_forecast: false, forecast_quarter: null }));
-
-  const forecastTopics = allPart2Cats.filter((c) => c.is_forecast);
+  const part1Topics = [...new Set(part1Draft.map((question) => dbPart1Topics.find((topic) => topic.id === question.topicId)?.name).filter((name): name is string => Boolean(name)))];
+  const part2Topics = [...new Set(part2Draft.map((question) => dbPart2Topics.find((topic) => topic.id === question.topicId)?.name).filter((name): name is string => Boolean(name)))];
+  const selectedPart2TopicIds = new Set(part2Draft.map((question) => question.topicId));
+  const part3TopicBank = dbPart2Topics.filter((topic) => selectedPart2TopicIds.has(topic.id));
+  const forecastTopics = dbPart2Topics.filter((topic) => topic.is_forecast);
   const currentQuarter = forecastTopics[0]?.forecast_quarter ?? null;
-
-  const displayedPart2Cats = (forecastOnly ? forecastTopics : allPart2Cats)
-    .slice()
-    .sort((a, b) => (b.is_forecast ? 1 : 0) - (a.is_forecast ? 1 : 0));
-
-  const activePart2Cats = displayedPart2Cats;
 
   const scores = [fluency, lexical, grammar, pronunciation];
   const allScored = scores.every((s) => s > 0);
   const estimatedBand = allScored ? calcBand(scores) : null;
-
-  function togglePart1Topic(topic: string) {
-    setPart1Topics((prev) =>
-      prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic]
-    );
-  }
 
   async function handleSubmit() {
     setLoading(true);
@@ -151,20 +130,12 @@ export default function NewSpeakingEntryPage() {
           notes: "",
         });
       }
-      if (part2Topic) {
+      if (part2Topics.length > 0) {
         parts.push({
           part: 2,
-          topic: part2Topic,
-          topic_category: part2Category,
-          notes: "",
-        });
-      }
-      if (part3Notes) {
-        parts.push({
-          part: 3,
-          topic: "",
+          topic: part2Topics.join(", "),
           topic_category: "",
-          notes: part3Notes,
+          notes: "",
         });
       }
 
@@ -182,6 +153,7 @@ export default function NewSpeakingEntryPage() {
       }
 
       await createSpeakingEntry({
+        name,
         date,
         type: entryType,
         fluency_score: fluency,
@@ -191,6 +163,7 @@ export default function NewSpeakingEntryPage() {
         reflection,
         parts,
         recording_url: recordingPath ?? null,
+        notebook: [...part1Draft, ...part2Draft, ...part3Draft],
       });
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -206,6 +179,12 @@ export default function NewSpeakingEntryPage() {
   const criteriaSetters = [setFluency, setLexical, setGrammar, setPronunciation];
   const criteriaValues = [fluency, lexical, grammar, pronunciation];
 
+  function updatePart2Draft(questions: NewRecordNotebookQuestion[]) {
+    setPart2Draft(questions);
+    const topicIds = new Set(questions.map((question) => question.topicId));
+    setPart3Draft((current) => current.filter((question) => topicIds.has(question.topicId)));
+  }
+
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in-up">
       <div>
@@ -217,14 +196,13 @@ export default function NewSpeakingEntryPage() {
         </button>
         <h1 className="heading-lg">Log Speaking Session</h1>
         <p className="text-[var(--color-ink-secondary)] mt-1">
-          Step {step} of 3 &mdash;{" "}
-          {step === 1 ? "Scores & Type" : step === 2 ? "Part Details" : "Reflection"}
+          Step {step} of 2 &mdash; {step === 1 ? "Scores & Type" : "Reflection"}
         </p>
       </div>
 
       {/* Progress bar */}
       <div className="flex gap-2">
-        {[1, 2, 3].map((s) => (
+        {[1, 2].map((s) => (
           <div
             key={s}
             className="flex-1 h-1.5 rounded-full transition-colors"
@@ -241,9 +219,39 @@ export default function NewSpeakingEntryPage() {
         </p>
       )}
 
+      {forecastTopics.length > 0 && currentQuarter && (
+        <ForecastBanner
+          quarter={currentQuarter}
+          topics={forecastTopics.map((topic) => ({ name: topic.name, part: 2 }))}
+        />
+      )}
+
+      <Part1Notebook
+        part={1}
+        topics={dbPart1Topics}
+        onDraftChange={setPart1Draft}
+      />
+      <Part1Notebook
+        part={2}
+        topics={dbPart2Topics}
+        onDraftChange={updatePart2Draft}
+      />
+      <Part1Notebook
+        part={3}
+        topics={part3TopicBank}
+        onDraftChange={setPart3Draft}
+      />
+
       {/* STEP 1: Scores & Type */}
       {step === 1 && (
         <div className="card-base p-6 space-y-5">
+          <Input
+            label="Record Name (optional)"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="e.g. Weekend speaking practice"
+            maxLength={120}
+          />
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="Date"
@@ -318,127 +326,8 @@ export default function NewSpeakingEntryPage() {
         </div>
       )}
 
-      {/* STEP 2: Part Details */}
+      {/* STEP 2: Reflection */}
       {step === 2 && (
-        <div className="space-y-4">
-          {/* Forecast Banner */}
-          {forecastTopics.length > 0 && currentQuarter && (
-            <ForecastBanner
-              quarter={currentQuarter}
-              topics={forecastTopics.map((t) => ({ name: t.name, part: 2 }))}
-            />
-          )}
-
-          {/* Part 1 */}
-          <div className="card-base p-5 space-y-3">
-            <h3 className="heading-sm">
-              <span style={{ color: MODULE_COLOR }}>Part 1</span> — Topics Discussed
-            </h3>
-            <p className="text-xs text-[var(--color-ink-muted)]">
-              Select 2–3 topics that came up
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {activePart1Topics.map((topic) => (
-                <button
-                  key={topic}
-                  type="button"
-                  onClick={() => togglePart1Topic(topic)}
-                  className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer border"
-                  style={
-                    part1Topics.includes(topic)
-                      ? {
-                          backgroundColor: MODULE_COLOR,
-                          color: "white",
-                          borderColor: MODULE_COLOR,
-                        }
-                      : {
-                          backgroundColor: "var(--color-card)",
-                          color: "var(--color-ink-secondary)",
-                          borderColor: "var(--color-line)",
-                        }
-                  }
-                >
-                  {topic}
-                </button>
-              ))}
-            </div>
-            {part1Topics.length > 0 && (
-              <p className="text-xs text-[var(--color-ink-muted)]">
-                {part1Topics.length} selected: {part1Topics.join(", ")}
-              </p>
-            )}
-          </div>
-
-          {/* Part 2 */}
-          <div className="card-base p-5 space-y-3">
-            <h3 className="heading-sm">
-              <span style={{ color: MODULE_COLOR }}>Part 2</span> — Cue Card
-            </h3>
-            <Input
-              label="Cue Card Topic"
-              value={part2Topic}
-              onChange={(e) => setPart2Topic(e.target.value)}
-              placeholder="e.g. Describe a person who has influenced you"
-            />
-            {forecastTopics.length > 0 && (
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={forecastOnly}
-                  onChange={(e) => setForecastOnly(e.target.checked)}
-                  className="rounded"
-                />
-                <span>Show forecast topics only</span>
-                <span className="text-xs text-[var(--color-ink-muted)]">({forecastTopics.length} topics)</span>
-              </label>
-            )}
-            <Select
-              label="Category"
-              value={part2Category}
-              onChange={(e) => setPart2Category(e.target.value)}
-            >
-              <option value="">Select category...</option>
-              {activePart2Cats.map((cat) => (
-                <option key={cat.id} value={cat.name}>
-                  {cat.is_forecast ? "★ " : ""}{cat.name}{cat.examples ? ` — ${cat.examples}` : ""}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-          {/* Part 3 */}
-          <div className="card-base p-5 space-y-3">
-            <h3 className="heading-sm">
-              <span style={{ color: MODULE_COLOR }}>Part 3</span> — Discussion
-            </h3>
-            <div>
-              <label className="block text-sm font-medium text-[var(--color-ink)] mb-1.5">
-                Notes on discussion questions
-              </label>
-              <textarea
-                value={part3Notes}
-                onChange={(e) => setPart3Notes(e.target.value)}
-                rows={3}
-                placeholder="What questions were asked? How did the discussion go?"
-                className="w-full px-3 py-2 rounded-lg border border-[var(--color-line)] bg-[var(--color-card)] text-[var(--color-ink)] text-sm placeholder:text-[var(--color-ink-muted)] focus:outline-none focus:ring-2 resize-y"
-                style={{ "--tw-ring-color": MODULE_COLOR } as React.CSSProperties}
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-between">
-            <Button onClick={() => setStep(1)} variant="secondary">
-              <ChevronLeft className="w-4 h-4" /> Back
-            </Button>
-            <Button onClick={() => setStep(3)} variant="primary">
-              Next <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* STEP 3: Reflection */}
-      {step === 3 && (
         <div className="space-y-4">
           <div className="card-base p-6 space-y-4">
             <div>
@@ -476,7 +365,7 @@ export default function NewSpeakingEntryPage() {
           </div>
 
           <div className="flex justify-between pt-2">
-            <Button onClick={() => setStep(2)} variant="secondary">
+            <Button onClick={() => setStep(1)} variant="secondary">
               <ChevronLeft className="w-4 h-4" /> Back
             </Button>
             <Button onClick={handleSubmit} variant="primary" loading={loading || uploading}>

@@ -4,6 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { updateStreak } from "@/lib/streak";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { addEntryQuestion, saveSpeakingAnswer } from "./notebook-actions";
+import type { NewRecordNotebookQuestion } from "@/lib/speaking/notebook-validation";
+import { parseSpeakingRecordName } from "@/lib/speaking/record-name";
 
 export type PartDetailInput = {
   part: 1 | 2 | 3;
@@ -13,6 +16,7 @@ export type PartDetailInput = {
 };
 
 export type CreateSpeakingEntryInput = {
+  name: string;
   date: string;
   type: "practice" | "mock_test" | "real_test";
   fluency_score: number;
@@ -22,6 +26,7 @@ export type CreateSpeakingEntryInput = {
   reflection: string;
   parts: PartDetailInput[];
   recording_url?: string | null;
+  notebook?: NewRecordNotebookQuestion[];
 };
 
 function calcBand(scores: number[]): number {
@@ -45,6 +50,7 @@ export async function createSpeakingEntry(input: CreateSpeakingEntryInput) {
     .from("speaking_entries")
     .insert({
       user_id: user.id,
+      name: parseSpeakingRecordName(input.name),
       date: input.date,
       type: input.type,
       estimated_band,
@@ -74,6 +80,19 @@ export async function createSpeakingEntry(input: CreateSpeakingEntryInput) {
       .insert(partRows);
 
     if (partsError) throw partsError;
+  }
+
+  for (const question of input.notebook ?? []) {
+    const questionId = await addEntryQuestion({
+      entryId: entry.id,
+      part: question.part,
+      topicId: question.topicId,
+      questionText: question.questionText,
+      answerFunction: question.answerFunction,
+    });
+    for (const answer of question.answers) {
+      await saveSpeakingAnswer({ ...answer, entryQuestionId: questionId });
+    }
   }
 
   // Update daily activity
@@ -122,7 +141,7 @@ export async function createSpeakingEntry(input: CreateSpeakingEntryInput) {
 
   revalidatePath("/speaking");
   revalidatePath("/dashboard");
-  redirect("/speaking");
+  redirect(`/speaking/${entry.id}#part-1-answer-sheet`);
 }
 
 export async function getSpeakingEntries() {
@@ -132,7 +151,7 @@ export async function getSpeakingEntries() {
 
   const { data, error } = await supabase
     .from("speaking_entries")
-    .select("id, date, type, estimated_band, fluency_score, lexical_score, grammar_score, pronunciation_score")
+    .select("id, name, date, type, estimated_band, fluency_score, lexical_score, grammar_score, pronunciation_score")
     .eq("user_id", user.id)
     .order("date", { ascending: false });
 

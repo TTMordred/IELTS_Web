@@ -2,6 +2,7 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { speakingRecordLabel } from "@/lib/speaking/record-name";
 
 export type LinkableTable =
   | "listening_records"
@@ -113,10 +114,10 @@ async function fetchLabelsInBatch(
         case "speaking_entries": {
           const { data } = await supabase
             .from("speaking_entries")
-            .select("id, type, date")
+            .select("id, name, type, date")
             .in("id", ids);
           for (const r of data ?? []) {
-            labelMap.set(`${table}:${r.id}`, `Speaking - ${r.date}`);
+            labelMap.set(`${table}:${r.id}`, speakingRecordLabel(r.name, r.type, r.date));
           }
           break;
         }
@@ -188,11 +189,11 @@ async function fetchLabel(
       case "speaking_entries": {
         const { data } = await supabase
           .from("speaking_entries")
-          .select("type, date")
+          .select("name, type, date")
           .eq("id", id)
           .single();
         if (!data) return "Speaking entry";
-        return `Speaking - ${data.date}`;
+        return speakingRecordLabel(data.name, data.type, data.date);
       }
       case "vocab_cards": {
         const { data } = await supabase
@@ -392,13 +393,13 @@ export async function searchRecords(
       case "speaking_entries": {
         const { data } = await supabase
           .from("speaking_entries")
-          .select("id, type, date")
+          .select("id, name, type, date")
           .eq("user_id", user.id)
-          .ilike("type", `%${query}%`)
+          .or(`name.ilike.%${query}%,type.ilike.%${query}%`)
           .limit(10);
         return (data ?? []).map((r) => ({
           id: r.id,
-          label: `Speaking - ${r.date}`,
+          label: speakingRecordLabel(r.name, r.type, r.date),
           subtitle: r.type,
         }));
       }
