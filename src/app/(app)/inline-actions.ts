@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { parseSpeakingRecordName } from "@/lib/speaking/record-name";
 
 export async function inlineUpdateField(
   table: string,
@@ -18,7 +19,7 @@ export async function inlineUpdateField(
     listening_records: ["test_name", "reflection", "total_score", "self_rating", "source"],
     reading_records: ["test_name", "reflection", "total_score", "self_rating", "source"],
     writing_entries: ["topic", "feedback", "essay_content"],
-    speaking_entries: ["reflection"],
+    speaking_entries: ["name", "reflection"],
     vocab_cards: ["word", "meaning", "example", "topic"],
     grammar_notes: ["rule"],
   };
@@ -32,9 +33,12 @@ export async function inlineUpdateField(
   const userIdTables = ["listening_records", "reading_records", "writing_entries", "speaking_entries", "vocab_cards", "grammar_notes"];
 
   if (userIdTables.includes(table)) {
+    const normalizedValue = table === "speaking_entries" && field === "name"
+      ? parseSpeakingRecordName(value ?? "")
+      : value;
     const { error } = await supabase
       .from(table)
-      .update({ [field]: value })
+      .update({ [field]: normalizedValue })
       .eq("id", id)
       .eq("user_id", user.id);
 

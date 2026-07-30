@@ -6,6 +6,7 @@ import { bandToColor } from "@/lib/constants/band-tables";
 import { MessageSquare, Plus } from "lucide-react";
 import { SpeakingIllustration } from "@/components/ui/module-illustrations";
 import { SPEAKING_ENTRY_TYPES, SPEAKING_CRITERIA } from "@/lib/constants/speaking-types";
+import { speakingRecordLabel } from "@/lib/speaking/record-name";
 
 const MODULE_COLOR = "#1D9E75";
 
@@ -89,7 +90,7 @@ export default async function SpeakingPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-[var(--color-ink)] truncate">
-                    {typeLabel(entry.type)}
+                    {speakingRecordLabel(entry.name, entry.type, entry.date)}
                   </p>
                   <p className="text-sm text-[var(--color-ink-muted)]">
                     {entry.date}

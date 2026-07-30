@@ -40,6 +40,9 @@ yarn-error.log*
 # omc state/sessions (never commit)
 .omc/
 
+# brainstorming companion sessions
+.superpowers/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

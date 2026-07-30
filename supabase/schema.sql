@@ -26,6 +26,7 @@ create policy "Users can update own profile" on public.profiles for update using
 create table if not exists public.listening_records (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
+  name text check (name is null or (btrim(name) <> '' and char_length(name) <= 120)),
   date date not null default current_date,
   source text not null default 'other',
   test_name text not null default '',

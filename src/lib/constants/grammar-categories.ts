@@ -13,6 +13,7 @@ export const GRAMMAR_CATEGORIES = [
   { id: "parallel", name: "Parallel Structure", bandImpact: "low", topics: "Balancing clauses, list formatting, consistent verb forms" },
   { id: "cohesion", name: "Cohesive Devices", bandImpact: "high", topics: "Linking words (however, moreover), Reference words (this, these, such)" },
   { id: "sva", name: "Subject-Verb Agreement", bandImpact: "medium", topics: "Collective nouns, Each/every, There is/are, Quantity expressions" },
+  { id: "speaking_patterns", name: "Speaking Sentence Patterns", bandImpact: "high", topics: "Reusable sentence patterns and grammar focus from Speaking practice" },
 ] as const;
 
 export type GrammarCategory = (typeof GRAMMAR_CATEGORIES)[number];

@@ -226,6 +226,71 @@ export type SpeakingPartDetail = {
 };
 
 // ── Grammar Notes ──
+export type WordMeaningItem = {
+  word: string;
+  meaning: string;
+};
+
+export type PhraseMeaningItem = {
+  phrase: string;
+  meaning: string;
+};
+
+export type LinkingWordItem = {
+  word: string;
+  function: string;
+};
+
+export type SpeakingAnswer = {
+  id: string;
+  entry_question_id: string;
+  position: number;
+  answer_text: string;
+  follow_up_ideas: string;
+  topic_specific_vocabulary: WordMeaningItem[];
+  useful_vocabulary: WordMeaningItem[];
+  advanced_adjectives_adverbs: WordMeaningItem[];
+  idioms_phrasal_verbs: PhraseMeaningItem[];
+  collocations: PhraseMeaningItem[];
+  linking_words: LinkingWordItem[];
+  synonyms_paraphrasing: string;
+  referencing_devices: string;
+  sentence_patterns: string;
+  grammar_focus: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type SpeakingEntryQuestion = {
+  id: string;
+  entry_id: string;
+  part: 1 | 2 | 3;
+  topic_id: string | null;
+  question_text: string;
+  answer_function: string;
+  created_at: string;
+  updated_at: string;
+  topic_name?: string;
+  answers?: SpeakingAnswer[];
+};
+
+export type LanguageNoteKind = "idiom" | "collocation" | "linking_word";
+
+export type LanguageNote = {
+  id: string;
+  user_id: string;
+  kind: LanguageNoteKind;
+  phrase: string;
+  meaning: string;
+  topic: string | null;
+  source: string | null;
+  mastery_level: number;
+  next_review: string;
+  review_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type GrammarNote = {
   id: string;
   user_id: string;

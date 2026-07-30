@@ -13,6 +13,9 @@ import { InlineEditField } from "@/components/ui/inline-edit-field";
 import { getRelatedRecords } from "@/app/(app)/record-links-actions";
 import { RelatedRecords } from "@/components/record-links/related-records";
 import { AiGradeSpeaking } from "@/components/ai/ai-grade-speaking";
+import { Part1Notebook } from "@/components/speaking/part1-notebook";
+import { getSpeakingNotebook, getSpeakingTopicBank } from "../notebook-actions";
+import { speakingRecordLabel } from "@/lib/speaking/record-name";
 
 const MODULE_COLOR = "#1D9E75";
 
@@ -47,7 +50,16 @@ export default async function SpeakingDetailPage({
   const { entry, parts, recordingSignedUrl } = data;
   if (!entry) notFound();
 
-  const relatedLinks = await getRelatedRecords("speaking_entries", entry.id);
+  const [relatedLinks, part1Notebook, part2Notebook, part3Notebook, part1Topics, part2Topics] = await Promise.all([
+    getRelatedRecords("speaking_entries", entry.id),
+    getSpeakingNotebook(entry.id, 1),
+    getSpeakingNotebook(entry.id, 2),
+    getSpeakingNotebook(entry.id, 3),
+    getSpeakingTopicBank(1),
+    getSpeakingTopicBank(2),
+  ]);
+  const selectedPart2TopicIds = new Set(part2Notebook.map((question) => question.topic_id));
+  const part3Topics = part2Topics.filter((topic) => selectedPart2TopicIds.has(topic.id));
 
   const criteriaScores = [
     { ...SPEAKING_CRITERIA[0], score: entry.fluency_score },
@@ -74,7 +86,13 @@ export default async function SpeakingDetailPage({
           <div>
             <h1 className="heading-lg flex items-center gap-2">
               <MessageSquare className="w-5 h-5" style={{ color: MODULE_COLOR }} />
-              {typeLabel(entry.type)}
+              <InlineEditField
+                table="speaking_entries"
+                id={entry.id}
+                field="name"
+                value={entry.name}
+                placeholder={speakingRecordLabel(null, entry.type, entry.date)}
+              />
             </h1>
             <p className="text-[var(--color-ink-secondary)] mt-1">
               {entry.date}
@@ -202,6 +220,25 @@ export default async function SpeakingDetailPage({
           )}
         </div>
       )}
+
+      <Part1Notebook
+        part={1}
+        entryId={entry.id}
+        initialQuestions={part1Notebook}
+        topics={part1Topics}
+      />
+      <Part1Notebook
+        part={2}
+        entryId={entry.id}
+        initialQuestions={part2Notebook}
+        topics={part2Topics}
+      />
+      <Part1Notebook
+        part={3}
+        entryId={entry.id}
+        initialQuestions={part3Notebook}
+        topics={part3Topics}
+      />
 
       {/* Reflection */}
       <div className="card-base p-5">
