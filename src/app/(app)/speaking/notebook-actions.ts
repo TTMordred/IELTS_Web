@@ -120,9 +120,31 @@ export async function addEntryQuestion(input: {
   if (topicError || !topic) throw new Error("Topic not found");
 
   const questions = Array.isArray(topic.sample_questions) ? topic.sample_questions : [];
-  const questionMatches = parsed.data.part === 2
-    ? parsed.data.questionText === topic.name
-    : questions.includes(parsed.data.questionText);
+  const normalizeQuestion = (value: string) =>
+    value.trim().replace(/\s+/g, " ").toLowerCase();
+
+  const submittedQuestion = normalizeQuestion(
+    parsed.data.questionText
+  );
+
+  const questionMatches =
+    questions.length === 0
+      ? submittedQuestion === normalizeQuestion(topic.name)
+      : questions.some(
+        (question) =>
+          typeof question === "string" &&
+          normalizeQuestion(question) === submittedQuestion
+      );
+
+  if (!questionMatches) {
+    console.error("Question-topic mismatch:", {
+      topicName: topic.name,
+      questions,
+      submittedQuestion: parsed.data.questionText,
+    });
+
+    throw new Error("Question does not belong to this topic");
+  }
   if (!questionMatches) throw new Error("Question does not belong to this topic");
 
   const { data, error } = await supabase.from("speaking_entry_questions").insert({
@@ -237,15 +259,15 @@ async function createDerivedLearningItems(
     .single();
   const activityResult = activity
     ? await supabase.from("daily_activity").update({
-        xp_earned: activity.xp_earned + xp,
-        notes_added: activity.notes_added + newGrammarCount + newPhrases.length,
-      }).eq("id", activity.id)
+      xp_earned: activity.xp_earned + xp,
+      notes_added: activity.notes_added + newGrammarCount + newPhrases.length,
+    }).eq("id", activity.id)
     : await supabase.from("daily_activity").insert({
-        user_id: userId,
-        date: today,
-        xp_earned: xp,
-        notes_added: newGrammarCount + newPhrases.length,
-      });
+      user_id: userId,
+      date: today,
+      xp_earned: xp,
+      notes_added: newGrammarCount + newPhrases.length,
+    });
   if (activityResult.error) throw activityResult.error;
 
   await updateStreak(supabase, userId);
