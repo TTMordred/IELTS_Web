@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { addResource, deleteResource, incrementUsage } from "@/app/(app)/resources/actions";
 import { Plus, Trash2, ExternalLink, Search, X, Star, Globe } from "lucide-react";
+import { useDraftAutosave } from "@/hooks/use-draft-autosave";
+import { DraftRestoreBanner, DraftSavedIndicator } from "@/components/ui/draft-status";
 
 type Resource = {
   id: string;
@@ -54,6 +56,36 @@ export function ResourceBoard({ initialResources }: { initialResources: Resource
   const [notes, setNotes] = useState("");
   const [isPublic, setIsPublic] = useState(false);
 
+  // Google-Forms-style draft autosave for the Add Resource form
+  const draftAutosave = useDraftAutosave({
+    key: "resource-board:add",
+    value: { url, title, module, difficulty, notes, isPublic },
+    enabled: showForm,
+  });
+
+  function restoreDraft() {
+    const d = draftAutosave.draft;
+    if (!d) return;
+    setUrl(d.url ?? "");
+    setTitle(d.title ?? "");
+    if (d.module) setModule(d.module);
+    if (d.difficulty) setDifficulty(d.difficulty);
+    setNotes(d.notes ?? "");
+    setIsPublic(d.isPublic ?? false);
+    setShowForm(true);
+    draftAutosave.consumeDraft();
+  }
+
+  function toggleAddForm() {
+    if (showForm) {
+      draftAutosave.clearDraft();
+      setUrl("");
+      setTitle("");
+      setNotes("");
+    }
+    setShowForm(!showForm);
+  }
+
   const filtered = resources.filter((r) => {
     if (moduleFilter !== "all" && r.module !== moduleFilter) return false;
     if (search && !r.title.toLowerCase().includes(search.toLowerCase()) && !r.url.toLowerCase().includes(search.toLowerCase())) return false;
@@ -70,6 +102,7 @@ export function ResourceBoard({ initialResources }: { initialResources: Resource
         tags: [], rating: null, notes: notes.trim() || null, usage_count: 0, is_public: isPublic,
         created_at: new Date().toISOString(),
       }, ...prev]);
+      draftAutosave.clearDraft();
       setUrl(""); setTitle(""); setNotes(""); setShowForm(false);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
@@ -106,15 +139,26 @@ export function ResourceBoard({ initialResources }: { initialResources: Resource
             </button>
           ))}
         </div>
-        <Button variant={showForm ? "secondary" : "primary"} size="sm" onClick={() => setShowForm(!showForm)}>
+        <Button variant={showForm ? "secondary" : "primary"} size="sm" onClick={toggleAddForm}>
           {showForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
           {showForm ? "Cancel" : "Add Resource"}
         </Button>
       </div>
 
+      {draftAutosave.showRestore && (
+        <DraftRestoreBanner
+          savedAt={draftAutosave.savedAt}
+          onRestore={restoreDraft}
+          onDismiss={draftAutosave.clearDraft}
+        />
+      )}
+
       {/* Add Form */}
       {showForm && (
         <div className="card-base p-5 space-y-3 animate-fade-in-up">
+          <div className="flex justify-end">
+            <DraftSavedIndicator status={draftAutosave.status} savedAt={draftAutosave.savedAt} />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <Input label="URL" type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." required />
             <Input label="Title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Resource name" required />

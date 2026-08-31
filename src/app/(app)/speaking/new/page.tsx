@@ -16,7 +16,13 @@ import { ForecastBanner } from "@/components/dashboard/forecast-banner";
 import { SpeakingRecorder } from "@/components/speaking/speaking-recorder";
 import { uploadSpeakingRecording } from "@/lib/storage/speaking-recordings";
 import { Part1Notebook, type TopicBankItem } from "@/components/speaking/part1-notebook";
+import { Part2Notebook } from "@/components/speaking/part2-notebook";
+import { Part3Notebook } from "@/components/speaking/part3-notebook";
+import { useDraftAutosave } from "@/hooks/use-draft-autosave";
+import { DraftRestoreBanner, DraftSavedIndicator } from "@/components/ui/draft-status";
 import type { NewRecordNotebookQuestion } from "@/lib/speaking/notebook-validation";
+import type { Part2CardDraft } from "@/lib/speaking/part2-validation";
+import type { Part3QuestionDraft } from "@/lib/speaking/part3-validation";
 
 const MODULE_COLOR = "#1D9E75";
 
@@ -87,14 +93,14 @@ export default function NewSpeakingEntryPage() {
   const [dbPart1Topics, setDbPart1Topics] = useState<TopicBankItem[]>([]);
   const [dbPart2Topics, setDbPart2Topics] = useState<TopicBankItem[]>([]);
   const [part1Draft, setPart1Draft] = useState<NewRecordNotebookQuestion[]>([]);
-  const [part2Draft, setPart2Draft] = useState<NewRecordNotebookQuestion[]>([]);
-  const [part3Draft, setPart3Draft] = useState<NewRecordNotebookQuestion[]>([]);
+  const [part2CardsDraft, setPart2CardsDraft] = useState<Part2CardDraft[]>([]);
+  const [part3Draft, setPart3Draft] = useState<Part3QuestionDraft[]>([]);
 
   useEffect(() => {
     const supabase = createClient();
     Promise.all([
       supabase.from("global_topics").select("id, name, sample_questions").eq("module", "speaking").eq("part", 1).order("name"),
-      supabase.from("global_topics").select("id, name, sample_questions, is_forecast, forecast_quarter").eq("module", "speaking").eq("part", 2).order("name"),
+      supabase.from("global_topics").select("id, name, category, sample_questions, is_forecast, forecast_quarter").eq("module", "speaking").eq("part", 2).order("name"),
     ]).then(([p1, p2]) => {
       if (p1.data && p1.data.length > 0) {
         setDbPart1Topics(p1.data);
@@ -106,15 +112,51 @@ export default function NewSpeakingEntryPage() {
   }, []);
 
   const part1Topics = [...new Set(part1Draft.map((question) => dbPart1Topics.find((topic) => topic.id === question.topicId)?.name).filter((name): name is string => Boolean(name)))];
-  const part2Topics = [...new Set(part2Draft.map((question) => dbPart2Topics.find((topic) => topic.id === question.topicId)?.name).filter((name): name is string => Boolean(name)))];
-  const selectedPart2TopicIds = new Set(part2Draft.map((question) => question.topicId));
+  const part2Topics = [...new Set(part2CardsDraft.map((card) => card.cue_card).filter((name): name is string => Boolean(name)))];
+  const part2Types = [...new Set(part2CardsDraft.map((card) => card.cue_card_type))];
+  const selectedPart2TopicIds = new Set(part2CardsDraft.map((card) => card.topicId).filter((id): id is string => Boolean(id)));
   const part3TopicBank = dbPart2Topics.filter((topic) => selectedPart2TopicIds.has(topic.id));
+  const part3TopicNames = [...new Set(part3Draft.map((question) => question.topic).filter((name): name is string => Boolean(name)))];
+  const part3Functions = [...new Set(part3Draft.map((question) => question.answer_function))];
   const forecastTopics = dbPart2Topics.filter((topic) => topic.is_forecast);
   const currentQuarter = forecastTopics[0]?.forecast_quarter ?? null;
 
   const scores = [fluency, lexical, grammar, pronunciation];
   const allScored = scores.every((s) => s > 0);
   const estimatedBand = allScored ? calcBand(scores) : null;
+
+  // Google-Forms-style draft autosave across all steps (incl. the answer sheets)
+  const draftValue = {
+    name,
+    date,
+    entryType,
+    fluency,
+    lexical,
+    grammar,
+    pronunciation,
+    reflection,
+    part1Draft,
+    part2CardsDraft,
+    part3Draft,
+  };
+  const draftAutosave = useDraftAutosave({ key: "speaking-entry:new", value: draftValue });
+
+  function restoreDraft() {
+    const d = draftAutosave.draft;
+    if (!d) return;
+    setName(d.name ?? "");
+    if (d.date) setDate(d.date);
+    if (d.entryType) setEntryType(d.entryType);
+    setFluency(d.fluency ?? 0);
+    setLexical(d.lexical ?? 0);
+    setGrammar(d.grammar ?? 0);
+    setPronunciation(d.pronunciation ?? 0);
+    setReflection(d.reflection ?? "");
+    setPart1Draft(d.part1Draft ?? []);
+    setPart2CardsDraft(d.part2CardsDraft ?? []);
+    setPart3Draft(d.part3Draft ?? []);
+    draftAutosave.consumeDraft();
+  }
 
   async function handleSubmit() {
     setLoading(true);
@@ -134,7 +176,15 @@ export default function NewSpeakingEntryPage() {
         parts.push({
           part: 2,
           topic: part2Topics.join(", "),
-          topic_category: "",
+          topic_category: part2Types.join(", "),
+          notes: "",
+        });
+      }
+      if (part3TopicNames.length > 0) {
+        parts.push({
+          part: 3,
+          topic: part3TopicNames.join(", "),
+          topic_category: part3Functions.join(", "),
           notes: "",
         });
       }
@@ -163,8 +213,11 @@ export default function NewSpeakingEntryPage() {
         reflection,
         parts,
         recording_url: recordingPath ?? null,
-        notebook: [...part1Draft, ...part2Draft, ...part3Draft],
+        notebook: part1Draft,
+        part2Cards: part2CardsDraft,
+        part3Questions: part3Draft,
       });
+      draftAutosave.clearDraft();
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Failed to save");
@@ -179,10 +232,10 @@ export default function NewSpeakingEntryPage() {
   const criteriaSetters = [setFluency, setLexical, setGrammar, setPronunciation];
   const criteriaValues = [fluency, lexical, grammar, pronunciation];
 
-  function updatePart2Draft(questions: NewRecordNotebookQuestion[]) {
-    setPart2Draft(questions);
-    const topicIds = new Set(questions.map((question) => question.topicId));
-    setPart3Draft((current) => current.filter((question) => topicIds.has(question.topicId)));
+  function updatePart2Draft(cards: Part2CardDraft[]) {
+    setPart2CardsDraft(cards);
+    const topicIds = new Set(cards.map((card) => card.topicId).filter((id): id is string => Boolean(id)));
+    setPart3Draft((current) => current.filter((question) => question.topicId != null && topicIds.has(question.topicId)));
   }
 
   return (
@@ -194,11 +247,18 @@ export default function NewSpeakingEntryPage() {
         >
           <ChevronLeft className="w-4 h-4" /> Back
         </button>
-        <h1 className="heading-lg">Log Speaking Session</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="heading-lg">Log Speaking Session</h1>
+          <DraftSavedIndicator status={draftAutosave.status} savedAt={draftAutosave.savedAt} />
+        </div>
         <p className="text-[var(--color-ink-secondary)] mt-1">
           Step {step} of 2 &mdash; {step === 1 ? "Scores & Type" : "Reflection"}
         </p>
       </div>
+
+      {draftAutosave.showRestore && (
+        <DraftRestoreBanner savedAt={draftAutosave.savedAt} onRestore={restoreDraft} onDismiss={draftAutosave.clearDraft} />
+      )}
 
       {/* Progress bar */}
       <div className="flex gap-2">
@@ -229,16 +289,17 @@ export default function NewSpeakingEntryPage() {
       <Part1Notebook
         part={1}
         topics={dbPart1Topics}
+        initialDraft={part1Draft}
         onDraftChange={setPart1Draft}
       />
-      <Part1Notebook
-        part={2}
+      <Part2Notebook
         topics={dbPart2Topics}
+        initialDraft={part2CardsDraft}
         onDraftChange={updatePart2Draft}
       />
-      <Part1Notebook
-        part={3}
+      <Part3Notebook
         topics={part3TopicBank}
+        initialDraft={part3Draft}
         onDraftChange={setPart3Draft}
       />
 

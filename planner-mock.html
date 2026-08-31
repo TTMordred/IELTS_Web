@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Weekly Planner — Mock</title>
+<style>
+  :root {
+    --color-accent: #1B4D3E;
+    --color-accent-hover: #163F33;
+    --color-accent-light: #E8F5EE;
+    --color-ink: #1A1A2E;
+    --color-ink-secondary: #5A5F7A;
+    --color-ink-muted: #9AA0B5;
+    --color-card: #FFFFFF;
+    --color-line: #E5E7EB;
+    --color-line-light: #F0F1F3;
+    --color-surface-hover: #F5F6F8;
+    --shadow: 0 1px 3px rgba(16,24,40,.06), 0 1px 2px rgba(16,24,40,.04);
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #F8F9FA;
+    color: var(--color-ink);
+    padding: 24px;
+    min-height: 100vh;
+  }
+
+  .page { max-width: 1120px; margin: 0 auto; }
+
+  /* ── Header ─────────────────────────── */
+  .heading { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+  .heading svg { color: var(--color-accent); }
+  .subtitle { color: var(--color-ink-secondary); margin-top: 4px; font-size: 14px; }
+
+  /* ── GCal strip ─────────────────────── */
+  .gcal {
+    margin-top: 20px;
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .gcal h2 { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .gcal h2 svg { color: var(--color-accent); }
+  .gcal .today { font-size: 12px; color: var(--color-ink-muted); margin-top: 2px; }
+  .events { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .event {
+    font-size: 12px; padding: 5px 10px; border-radius: 8px;
+    background: var(--color-accent-light); color: var(--color-accent);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .event .t { color: var(--color-accent); font-weight: 600; opacity: .7; }
+  .gcal-connect {
+    display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--color-ink-secondary);
+  }
+  .btn {
+    border: 1px solid var(--color-line);
+    background: var(--color-card);
+    color: var(--color-ink-secondary);
+    padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all .15s ease;
+  }
+  .btn:hover { background: var(--color-surface-hover); color: var(--color-ink); }
+  .btn-primary { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+  .btn-primary:hover { background: var(--color-accent-hover); color: #fff; }
+
+  /* ── Week nav ───────────────────────── */
+  .week-nav {
+    margin-top: 20px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-group { display: flex; align-items: center; gap: 8px; }
+  .icon-btn {
+    width: 32px; height: 32px; border: 1px solid var(--color-line); border-radius: 8px;
+    background: var(--color-card); color: var(--color-ink-secondary); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all .15s ease;
+  }
+  .icon-btn:hover { background: var(--color-surface-hover); color: var(--color-ink); }
+  .month-label { font-size: 14px; font-weight: 600; }
+  .done-count { font-size: 12px; color: var(--color-ink-muted); }
+
+  /* ── Grid ───────────────────────────── */
+  .grid {
+    margin-top: 16px; background: var(--color-card); border: 1px solid var(--color-line);
+    border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;
+    overflow-x: auto;
+  }
+  .week {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; min-width: 840px;
+  }
+  .day-head { text-align: center; border-radius: 8px; padding: 6px 2px 8px; }
+  .day-head.today { background: var(--color-accent-light); }
+  .day-head .dow { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--color-ink-muted); }
+  .day-head.today .dow { color: var(--color-accent); }
+  .day-head .num { font-size: 15px; font-weight: 600; margin-top: 2px; color: var(--color-ink-secondary); }
+  .day-head.today .num { color: var(--color-accent); }
+
+  .day-cell {
+    min-height: 220px; border: 1px dashed var(--color-line); border-radius: 8px; padding: 6px;
+    display: flex; flex-direction: column; gap: 6px; transition: border-color .15s ease;
+  }
+  .day-cell:hover { border-color: var(--color-accent); }
+  .day-cell.today-cell { border-color: #CFE3D9; background: #FBFFFD; }
+
+  .module {
+    border-radius: 8px; padding: 8px; border: 1px solid var(--color-line);
+    position: relative; transition: all .15s ease; cursor: pointer;
+  }
+  .module:hover { border-color: #C9CFD8; }
+  .module .badge {
+    display: inline-block; padding: 1px 7px; border-radius: 5px;
+    font-size: 10px; font-weight: 700; color: #fff; letter-spacing: .02em; margin-bottom: 4px;
+  }
+  .module .topic { font-size: 12px; line-height: 1.35; }
+  .module .dur { font-size: 10px; color: var(--color-ink-muted); margin-top: 3px; }
+  .module.done { opacity: .65; }
+  .module.done .topic { text-decoration: line-through; color: var(--color-ink-muted); }
+  .module .actions {
+    position: absolute; top: 4px; right: 4px; display: flex; gap: 2px; opacity: 0; transition: opacity .15s ease;
+  }
+  .module:hover .actions { opacity: 1; }
+  .mini-btn {
+    width: 20px; height: 20px; border: none; border-radius: 5px; background: transparent;
+    color: var(--color-ink-muted); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .mini-btn:hover { background: var(--color-accent-light); color: var(--color-accent); }
+  .mini-btn.danger:hover { background: #FDE8E8; color: #DC2626; }
+  .done-badge {
+    position: absolute; bottom: 4px; right: 4px; width: 16px; height: 16px; border-radius: 50%;
+    background: #1D9E75; display: none; align-items: center; justify-content: center;
+  }
+  .module.done .done-badge { display: flex; }
+
+  .add-btn {
+    margin-top: auto; height: 32px; border: 1px dashed var(--color-line); border-radius: 8px;
+    background: transparent; color: var(--color-ink-muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 11px; font-weight: 600;
+    transition: all .15s ease;
+  }
+  .add-btn:hover { color: var(--color-accent); border-color: var(--color-accent); background: var(--color-accent-light); }
+
+  /* ── Add form ───────────────────────── */
+  .add-form {
+    border: 1px solid var(--color-line); border-radius: 8px; background: var(--color-card);
+    padding: 8px; display: flex; flex-direction: column; gap: 6px; animation: pop .18s ease;
+  }
+  @keyframes pop { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+  .add-form .fhead { display: flex; align-items: center; justify-content: space-between; }
+  .add-form .fhead span { font-size: 10px; font-weight: 600; color: var(--color-ink-secondary); text-transform: uppercase; letter-spacing: .04em; }
+  .add-form select, .add-form input {
+    width: 100%; padding: 6px 8px; font-size: 11px; border: 1px solid var(--color-line);
+    border-radius: 6px; background: var(--color-card); color: var(--color-ink); outline: none;
+  }
+  .add-form select:focus, .add-form input:focus { border-color: var(--color-accent); box-shadow: 0 0 0 1px var(--color-accent); }
+  .add-form .submit { width: 100%; padding: 6px; border: none; border-radius: 6px; background: var(--color-accent); color: #fff; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .add-form .submit:hover { background: var(--color-accent-hover); }
+
+  /* ── Empty state ────────────────────── */
+  .empty-state {
+    margin-top: 16px; border: 1px dashed var(--color-line); border-radius: var(--radius);
+    padding: 28px; text-align: center; background: var(--color-card);
+  }
+  .empty-state .ico { width: 44px; height: 44px; margin: 0 auto 10px; border-radius: 12px; background: var(--color-accent-light); color: var(--color-accent); display: flex; align-items: center; justify-content: center; }
+  .empty-state h3 { font-size: 15px; font-weight: 600; }
+  .empty-state p { font-size: 13px; color: var(--color-ink-secondary); margin-top: 4px; }
+
+  /* ── Legend ─────────────────────────── */
+  .legend { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 14px; }
+  .legend .item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-ink-secondary); }
+  .legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* ── Toast ──────────────────────────── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--color-ink); color: #fff; font-size: 13px; padding: 10px 16px; border-radius: 10px;
+    opacity: 0; pointer-events: none; transition: all .25s ease; box-shadow: 0 8px 24px rgba(0,0,0,.18);
+    display: flex; align-items: center; gap: 8px; z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .mock-banner {
+    margin-top: 18px; font-size: 12px; color: var(--color-ink-muted);
+    border: 1px dashed var(--color-line); padding: 8px 12px; border-radius: 8px; text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="heading">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Weekly Planner
+  </div>
+  <p class="subtitle">Plan your IELTS study sessions for the week</p>
+
+  <!-- Google Calendar strip -->
+  <div class="gcal">
+    <div>
+      <h2>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        What are you doing today?
+      </h2>
+      <p class="today">Sat, Aug 23 · 2 events from Google Calendar</p>
+      <div class="events" id="events">
+        <span class="event"><span class="t">09:30</span> Mock Reading Test</span>
+        <span class="event"><span class="t">19:00</span> Speaking practice with AI</span>
+      </div>
+    </div>
+    <div class="gcal-connect">
+      <span style="font-size:12px">Connected to <b>personal@gmail.com</b></span>
+      <button class="btn" id="btn-sync">Sync into planner</button>
+    </div>
+  </div>
+
+  <!-- Week navigation -->
+  <div class="week-nav">
+    <div class="nav-group">
+      <button class="icon-btn" data-nav="-1" title="Previous week">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="btn" id="btn-this-week">This Week</button>
+      <button class="icon-btn" data-nav="1" title="Next week">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="nav-group">
+      <span class="month-label" id="month-label">August 2026</span>
+      <span class="done-count" id="done-count">2/5 done</span>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid">
+    <div class="week" id="week"></div>
+  </div>
+
+  <!-- Empty state (hidden by default) -->
+  <div class="empty-state" id="empty-state" style="display:none">
+    <div class="ico">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </div>
+    <h3>No sessions planned yet</h3>
+    <p>Click the <b>+ Add</b> button on any day to schedule your first IELTS session</p>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend" id="legend"></div>
+
+  <p class="mock-banner">Mock UI for review — click <b>+</b> on a day to try adding a module. Week navigation &amp; Google sync are simulated.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const MODULES = [
+    { key: 'listening', label: 'Listening', color: '#378ADD' },
+    { key: 'reading',   label: 'Reading',   color: '#D85A30' },
+    { key: 'speaking',  label: 'Speaking',  color: '#1D9E75' },
+    { key: 'writing',   label: 'Writing',   color: '#1B4D3E' },
+    { key: 'vocab',     label: 'Vocab',     color: '#0F766E' },
+    { key: 'grammar',   label: 'Grammar',   color: '#B45309' },
+  ];
+  const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const TODAY = 5; // Sat = index 5
+  const DURATIONS = [15,30,45,60,90,120];
+
+  // Sample data: [dayIndex, moduleKey, topic, duration(min), done]
+  const SAMPLE = [
+    [0,'listening','Cambridge 18 Test 1 Section 1',30,true],
+    [0,'reading','Skimming techniques',45,true],
+    [1,'writing','Task 1 — line chart',60,false],
+    [2,'speaking','Part 2 — describe a trip',45,false],
+    [4,'grammar','Conditionals review',30,false],
+    [5,'vocab','Topic: environment (20 words)',30,false],
+  ];
+
+  const week = document.getElementById('week');
+  const toast = document.getElementById('toast');
+  const doneCount = document.getElementById('done-count');
+  const emptyState = document.getElementById('empty-state');
+  let toastTimer;
+
+  const MODULES_BY_KEY = Object.fromEntries(MODULES.map(m => [m.key, m]));
+  let items = SAMPLE.map(([d,m,t,dur,done], i) => ({ id: i, day: d, module: m, topic: t, duration: dur, done }));
+
+  function hexWithAlpha(hex, alphaHex) { return hex + alphaHex; }
+
+  function moduleCard(item) {
+    const mod = MODULES_BY_KEY[item.module];
+    const el = document.createElement('div');
+    el.className = 'module' + (item.done ? ' done' : '');
+    el.style.backgroundColor = hexWithAlpha(mod.color, '18');
+    el.innerHTML = `
+      <span class="badge" style="background:${mod.color}">${mod.label}</span>
+      ${item.topic ? `<p class="topic">${item.topic}</p>` : ''}
+      <p class="dur">${item.duration} min</p>
+      <div class="actions">
+        <button class="mini-btn" data-act="toggle" title="Mark complete">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+        <button class="mini-btn danger" data-act="delete" title="Delete">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>
+      <div class="done-badge">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>`;
+    el.querySelector('[data-act="toggle"]').onclick = () => {
+      item.done = !item.done;
+      el.classList.toggle('done', item.done);
+      renderCounter();
+    };
+    el.querySelector('[data-act="delete"]').onclick = () => {
+      items = items.filter(i => i.id !== item.id);
+      render();
+      showToast('Session deleted');
+    };
+    return el;
+  }
+
+  function addForm(dayIndex, container, addBtn) {
+    const form = document.createElement('div');
+    form.className = 'add-form';
+    form.innerHTML = `
+      <div class="fhead"><span>New session</span></div>
+      <select class="f-module">
+        <option value="" disabled selected>Choose module…</option>
+        ${MODULES.map(m => `<option value="${m.key}">${m.label}</option>`).join('')}
+      </select>
+      <input class="f-topic" type="text" placeholder="Topic (optional)" />
+      <select class="f-dur">${DURATIONS.map(d => `<option value="${d}" ${d===30?'selected':''}>${d} min</option>`).join('')}</select>
+      <button class="submit">Add</button>`;
+    form.querySelector('.submit').onclick = () => {
+      const module = form.querySelector('.f-module').value;
+      const topic = form.querySelector('.f-topic').value.trim();
+      const duration = Number(form.querySelector('.f-dur').value);
+      if (!module) { showToast('Please choose a module'); return; }
+      const item = { id: Date.now(), day: dayIndex, module, topic: topic || null, duration, done: false };
+      items.push(item);
+      render();
+      showToast(`${MODULES_BY_KEY[module].label} session added`);
+    };
+    addBtn.replaceWith(form);
+  }
+
+  function render() {
+    week.innerHTML = '';
+    const perDay = Array.from({ length: 7 }, (_, d) => items.filter(i => i.day === d));
+    DAYS.forEach((dow, i) => {
+      const col = document.createElement('div');
+      const isToday = i === TODAY;
+      col.innerHTML = `
+        <div class="day-head ${isToday ? 'today' : ''}"><p class="dow">${dow}</p><p class="num">${17 + i}</p></div>
+        <div class="day-cell ${isToday ? 'today-cell' : ''}"></div>`;
+      const cell = col.querySelector('.day-cell');
+      perDay[i].forEach(item => cell.appendChild(moduleCard(item)));
+      const addBtn = document.createElement('button');
+      addBtn.className = 'add-btn';
+      addBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add`;
+      addBtn.onclick = () => addForm(i, cell, addBtn);
+      cell.appendChild(addBtn);
+      week.appendChild(col);
+    });
+    renderCounter();
+    renderLegend();
+  }
+
+  function renderCounter() {
+    const total = items.length;
+    const done = items.filter(i => i.done).length;
+    doneCount.textContent = total ? `${done}/${total} done` : '';
+    emptyState.style.display = total ? 'none' : 'block';
+  }
+
+  function renderLegend() {
+    document.getElementById('legend').innerHTML = MODULES.map(m =>
+      `<div class="item"><span class="dot" style="background:${m.color}"></span>${m.label}</div>`).join('');
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  // Week nav (simulated)
+  document.querySelectorAll('[data-nav]').forEach(b => b.onclick = () => showToast('Mock: switching weeks'));
+  document.getElementById('btn-this-week').onclick = () => showToast('Mock: jumped to this week');
+  document.getElementById('btn-sync').onclick = () => showToast('Mock: 3 events imported into planner');
+
+  render();
+</script>
+</body>
+</html>

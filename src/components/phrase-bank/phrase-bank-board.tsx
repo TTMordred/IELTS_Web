@@ -3,6 +3,8 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpenText, Loader2, Plus, Search, Trash2, X } from "lucide-react";
+import { useDraftAutosave } from "@/hooks/use-draft-autosave";
+import { DraftRestoreBanner, DraftSavedIndicator } from "@/components/ui/draft-status";
 import {
   addLanguageNote,
   deleteLanguageNote,
@@ -27,6 +29,34 @@ export function PhraseBankBoard({ initialNotes }: { initialNotes: LanguageNote[]
   const [newTopic, setNewTopic] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+  // Google-Forms-style draft autosave for the Add Item form
+  const draftAutosave = useDraftAutosave({
+    key: "phrase-bank:add",
+    value: { kind: activeKind, phrase, meaning, topic: newTopic },
+    enabled: showForm,
+  });
+
+  function restoreDraft() {
+    const d = draftAutosave.draft;
+    if (!d) return;
+    if (d.kind) setActiveKind(d.kind);
+    setPhrase(d.phrase ?? "");
+    setMeaning(d.meaning ?? "");
+    setNewTopic(d.topic ?? "");
+    setShowForm(true);
+    draftAutosave.consumeDraft();
+  }
+
+  function toggleAddForm() {
+    if (showForm) {
+      draftAutosave.clearDraft();
+      setPhrase("");
+      setMeaning("");
+      setNewTopic("");
+    }
+    setShowForm(!showForm);
+  }
 
   const topics = useMemo(
     () => [...new Set(initialNotes.map((note) => note.topic).filter((value): value is string => Boolean(value)))].toSorted(),
@@ -55,6 +85,7 @@ export function PhraseBankBoard({ initialNotes }: { initialNotes: LanguageNote[]
         });
         setMessage(result.created ? "Added to Phrase Bank" : "This item already exists");
         if (result.created) {
+          draftAutosave.clearDraft();
           setPhrase("");
           setMeaning("");
           setNewTopic("");
@@ -124,16 +155,27 @@ export function PhraseBankBoard({ initialNotes }: { initialNotes: LanguageNote[]
           <option value="">All topics</option>
           {topics.map((item) => <option key={item} value={item}>{item}</option>)}
         </select>
-        <button type="button" onClick={() => setShowForm((value) => !value)} className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)]">
+        <button type="button" onClick={toggleAddForm} className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)]">
           {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
           {showForm ? "Cancel" : "Add Item"}
         </button>
       </div>
 
+      {draftAutosave.showRestore && (
+        <DraftRestoreBanner
+          savedAt={draftAutosave.savedAt}
+          onRestore={restoreDraft}
+          onDismiss={draftAutosave.clearDraft}
+        />
+      )}
+
       {message ? <p role="status" className="rounded-lg bg-[var(--color-accent-light)] px-3 py-2 text-sm text-[var(--color-ink-secondary)]">{message}</p> : null}
 
       {showForm ? (
         <form onSubmit={submit} className="card-base grid gap-3 p-4 sm:grid-cols-2">
+          <div className="flex justify-end sm:col-span-2">
+            <DraftSavedIndicator status={draftAutosave.status} savedAt={draftAutosave.savedAt} />
+          </div>
           <label className="space-y-1.5">
             <span className="text-sm font-medium">Phrase or Word</span>
             <input value={phrase} onChange={(event) => setPhrase(event.target.value)} required className="w-full rounded-lg border border-[var(--color-line)] bg-[var(--color-card)] px-3 py-2 text-sm" />

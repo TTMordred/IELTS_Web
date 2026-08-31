@@ -226,19 +226,145 @@ export type SpeakingPartDetail = {
 };
 
 // ── Grammar Notes ──
+// `meaningVi` (optional) carries a Vietnamese gloss for the Speaking Part 2
+// Language Bank. It is additive — Part 1 rows simply omit it.
 export type WordMeaningItem = {
   word: string;
   meaning: string;
+  meaningVi?: string;
 };
 
 export type PhraseMeaningItem = {
   phrase: string;
   meaning: string;
+  meaningVi?: string;
 };
 
 export type LinkingWordItem = {
   word: string;
   function: string;
+  meaningVi?: string;
+};
+
+export type SynonymItem = {
+  vocabulary: string;
+  replacement: string;
+  meaningVi?: string;
+};
+
+export type ReferencingItem = {
+  phrase: string;
+  replacement: string;
+  meaningVi?: string;
+};
+
+export type SentencePatternItem = {
+  sentence: string;
+  meaning: string;
+  example: string;
+  meaningVi?: string;
+};
+
+export type GrammarFocusItem = {
+  grammar: string;
+  example: string;
+  meaningVi?: string;
+};
+
+// ── Speaking Part 2 Cue Cards ──
+export type CueCardType =
+  | "Person"
+  | "Place"
+  | "Object"
+  | "Activity"
+  | "Event"
+  | "Experience"
+  | "Skill"
+  | "Media"
+  | "Time";
+
+export type StorytellingDevice = {
+  expression: string;
+  meaningVi: string;
+  example?: string;
+};
+
+/** A reusable discussion expression for Part 3, mirroring Storytelling Devices (Part 2). */
+export type DiscussionDevice = {
+  expression: string;
+  meaningVi: string;
+  example?: string;
+};
+
+/** The 10-section Language Bank shared by Speaking Parts 2 and 3. */
+export type LanguageBank = {
+  topic_specific_vocabulary: WordMeaningItem[];
+  useful_vocabulary: WordMeaningItem[];
+  advanced_adjectives_adverbs: WordMeaningItem[];
+  idioms_phrasal_verbs: PhraseMeaningItem[];
+  collocations: PhraseMeaningItem[];
+  linking_words: LinkingWordItem[];
+  synonyms_paraphrasing: SynonymItem[];
+  referencing_devices: ReferencingItem[];
+  sentence_patterns: SentencePatternItem[];
+  grammar_focus: GrammarFocusItem[];
+};
+
+export type SpeakingPart2Card = {
+  id: string;
+  entry_id: string;
+  topic_id: string | null;
+  cue_card: string;
+  cue_card_type: CueCardType;
+  topic: string | null;
+  answer_structure: string[];
+  key_ideas: string[];
+  answer: string;
+  follow_up_ideas: string[];
+  storytelling_devices: StorytellingDevice[];
+  language_bank: LanguageBank;
+  position: number;
+  created_at: string;
+  updated_at: string;
+};
+
+// ── Speaking Part 3 Discussion Questions ──
+export type Part3AnswerFunction =
+  | "Opinion"
+  | "Cause / Reason"
+  | "Effect / Impact"
+  | "Advantages"
+  | "Disadvantages"
+  | "Compare / Contrast"
+  | "Agree / Disagree"
+  | "Problem"
+  | "Solution"
+  | "Prediction / Future"
+  | "Evaluation / A vs B";
+
+export type SupportingIdea = {
+  idea: string;
+  importance: "essential" | "optional";
+};
+
+export type SpeakingPart3Question = {
+  id: string;
+  entry_id: string;
+  topic_id: string | null;
+  question: string;
+  topic: string | null;
+  answer_function: Part3AnswerFunction;
+  answer_structure: string[];
+  main_idea: string;
+  supporting_ideas: SupportingIdea[];
+  alternative_view: string | null;
+  answer: string;
+  follow_up_ideas: string[];
+  discussion_devices: DiscussionDevice[];
+  language_bank: LanguageBank;
+  position: number;
+  created_at: string;
+  updated_at: string;
 };
 
 export type SpeakingAnswer = {
@@ -253,10 +379,10 @@ export type SpeakingAnswer = {
   idioms_phrasal_verbs: PhraseMeaningItem[];
   collocations: PhraseMeaningItem[];
   linking_words: LinkingWordItem[];
-  synonyms_paraphrasing: string;
-  referencing_devices: string;
-  sentence_patterns: string;
-  grammar_focus: string;
+  synonyms_paraphrasing: SynonymItem[];
+  referencing_devices: ReferencingItem[];
+  sentence_patterns: SentencePatternItem[];
+  grammar_focus: GrammarFocusItem[];
   created_at: string;
   updated_at: string;
 };

@@ -89,7 +89,7 @@ export async function getSpeakingTopicBank(part: 1 | 2 | 3) {
   const { supabase } = await requireUser();
   const { data, error } = await supabase
     .from("global_topics")
-    .select("id, name, sample_questions")
+    .select("id, name, category, sample_questions")
     .eq("module", "speaking")
     .eq("part", part === 3 ? 2 : part)
     .order("name");
@@ -127,14 +127,19 @@ export async function addEntryQuestion(input: {
     parsed.data.questionText
   );
 
+  // Part 2 submits the topic NAME as the question text; the topic's
+  // sample_questions array holds its Part 3 follow-ups, so it must not be
+  // matched against that array (which would always reject the topic name).
   const questionMatches =
-    questions.length === 0
+    parsed.data.part === 2
       ? submittedQuestion === normalizeQuestion(topic.name)
-      : questions.some(
-        (question) =>
-          typeof question === "string" &&
-          normalizeQuestion(question) === submittedQuestion
-      );
+      : questions.length === 0
+        ? submittedQuestion === normalizeQuestion(topic.name)
+        : questions.some(
+          (question) =>
+            typeof question === "string" &&
+            normalizeQuestion(question) === submittedQuestion
+        );
 
   if (!questionMatches) {
     console.error("Question-topic mismatch:", {
@@ -145,7 +150,6 @@ export async function addEntryQuestion(input: {
 
     throw new Error("Question does not belong to this topic");
   }
-  if (!questionMatches) throw new Error("Question does not belong to this topic");
 
   const { data, error } = await supabase.from("speaking_entry_questions").insert({
     entry_id: parsed.data.entryId,
@@ -225,21 +229,24 @@ async function createDerivedLearningItems(
     if (error) throw error;
   }
 
+  const grammarRule = input.grammar_focus.map((item) => item.grammar).join(", ");
+  const patternExamples = input.sentence_patterns.map((item) => item.sentence);
+
   const { data: existingGrammar, error: grammarReadError } = await supabase
     .from("grammar_notes")
     .select("rule")
     .eq("user_id", userId);
   if (grammarReadError) throw grammarReadError;
   const grammarExists = (existingGrammar ?? []).some(
-    (item) => normalizeLearningItem(item.rule) === normalizeLearningItem(input.grammar_focus),
+    (item) => normalizeLearningItem(item.rule) === normalizeLearningItem(grammarRule),
   );
   const newGrammarCount = grammarExists ? 0 : 1;
   if (!grammarExists) {
     const { error } = await supabase.from("grammar_notes").insert({
       user_id: userId,
       category: "speaking_patterns",
-      rule: input.grammar_focus,
-      correct_examples: input.sentence_patterns.split(/\r?\n/).map((line) => line.trim()).filter(Boolean),
+      rule: grammarRule,
+      correct_examples: patternExamples,
       common_mistakes: [],
       source,
       mastery_level: 0,

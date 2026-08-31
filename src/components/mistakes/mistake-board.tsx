@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,8 @@ import {
   ChevronLeft,
   AlertTriangle,
 } from "lucide-react";
+import { useDraftAutosave } from "@/hooks/use-draft-autosave";
+import { DraftRestoreBanner, DraftSavedIndicator } from "@/components/ui/draft-status";
 
 const MODULE_OPTIONS = [
   { value: "all", label: "All" },
@@ -76,6 +78,39 @@ export function MistakeBoard({ initialMistakes }: { initialMistakes: MistakeEntr
   const [fCorrectApproach, setFCorrectApproach] = useState("");
   const [fTags, setFTags] = useState("");
 
+  // Google-Forms-style draft autosave for the Add Mistake form
+  const draftAutosave = useDraftAutosave({
+    key: "mistake-board:add",
+    value: { fModule, fQuestionType, fDescription, fReason, fCorrectApproach, fTags },
+    enabled: showForm,
+  });
+
+  function restoreDraft() {
+    const d = draftAutosave.draft;
+    if (!d) return;
+    if (d.fModule) setFModule(d.fModule);
+    setFQuestionType(d.fQuestionType ?? "");
+    setFDescription(d.fDescription ?? "");
+    setFReason(d.fReason ?? "");
+    setFCorrectApproach(d.fCorrectApproach ?? "");
+    setFTags(d.fTags ?? "");
+    setShowForm(true);
+    draftAutosave.consumeDraft();
+  }
+
+  function toggleAddForm() {
+    if (showForm) {
+      draftAutosave.clearDraft();
+      setFModule("listening");
+      setFQuestionType("");
+      setFDescription("");
+      setFReason("");
+      setFCorrectApproach("");
+      setFTags("");
+    }
+    setShowForm(!showForm);
+  }
+
   const filtered = mistakes.filter((m) => {
     if (moduleFilter !== "all" && m.module !== moduleFilter) return false;
     if (unreviewedOnly && m.reviewed) return false;
@@ -108,6 +143,7 @@ export function MistakeBoard({ initialMistakes }: { initialMistakes: MistakeEntr
           .map((t) => t.trim())
           .filter(Boolean),
       });
+      draftAutosave.clearDraft();
       const newEntry: MistakeEntry = {
         id: crypto.randomUUID(),
         user_id: "",
@@ -257,6 +293,14 @@ export function MistakeBoard({ initialMistakes }: { initialMistakes: MistakeEntr
 
   return (
     <div className="space-y-4">
+      {draftAutosave.showRestore && (
+        <DraftRestoreBanner
+          savedAt={draftAutosave.savedAt}
+          onRestore={restoreDraft}
+          onDismiss={draftAutosave.clearDraft}
+        />
+      )}
+
       {/* Filter bar */}
       <div className="flex flex-wrap gap-3 items-center">
         <div className="flex-1 min-w-[200px] relative">
@@ -303,7 +347,7 @@ export function MistakeBoard({ initialMistakes }: { initialMistakes: MistakeEntr
           <Button
             variant={showForm ? "secondary" : "primary"}
             size="sm"
-            onClick={() => setShowForm(!showForm)}
+            onClick={toggleAddForm}
           >
             {showForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
             {showForm ? "Cancel" : "Add Mistake"}
@@ -314,6 +358,9 @@ export function MistakeBoard({ initialMistakes }: { initialMistakes: MistakeEntr
       {/* Add form */}
       {showForm && (
         <div className="card-base p-5 space-y-3 animate-fade-in-up">
+          <div className="flex justify-end">
+            <DraftSavedIndicator status={draftAutosave.status} savedAt={draftAutosave.savedAt} />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-[var(--color-ink-secondary)] mb-1">

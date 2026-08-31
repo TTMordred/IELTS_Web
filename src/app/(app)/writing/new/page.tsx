@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -15,6 +15,8 @@ import { createWritingEntry } from "../actions";
 import { createClient as createBrowserSupabase } from "@/lib/supabase/client";
 import { ChevronLeft, ChevronRight, Sparkles, Loader2, Check, UploadCloud, X } from "lucide-react";
 import { TeacherFeedbackPanel } from "@/components/writing/teacher-feedback-panel";
+import { useDraftAutosave } from "@/hooks/use-draft-autosave";
+import { DraftRestoreBanner, DraftSavedIndicator } from "@/components/ui/draft-status";
 import type { TeacherFeedback } from "@/lib/types";
 
 function countWords(html: string): number {
@@ -62,6 +64,47 @@ export default function NewWritingEntryPage() {
 
   const subTypes = taskType === "task1" ? WRITING_TASK1_TYPES : WRITING_TASK2_TYPES;
 
+  // Google-Forms-style draft autosave across both steps
+  const draftValue = {
+    date,
+    taskType,
+    subType,
+    topic,
+    topicCategory,
+    questionText,
+    essayContent,
+    timeSpentMin,
+    taScore,
+    ccScore,
+    lrScore,
+    graScore,
+    feedback,
+    teacherFeedback,
+    aiGraded,
+  };
+  const draftAutosave = useDraftAutosave({ key: "writing-entry:new", value: draftValue });
+
+  function restoreDraft() {
+    const d = draftAutosave.draft;
+    if (!d) return;
+    if (d.date) setDate(d.date);
+    if (d.taskType) setTaskType(d.taskType);
+    setSubType(d.subType ?? "");
+    setTopic(d.topic ?? "");
+    setTopicCategory(d.topicCategory ?? "");
+    setQuestionText(d.questionText ?? "");
+    setEssayContent(d.essayContent ?? "");
+    setTimeSpentMin(d.timeSpentMin ?? 40);
+    setTaScore(d.taScore ?? 6);
+    setCcScore(d.ccScore ?? 6);
+    setLrScore(d.lrScore ?? 6);
+    setGraScore(d.graScore ?? 6);
+    setFeedback(d.feedback ?? "");
+    setTeacherFeedback(d.teacherFeedback ?? null);
+    setAiGraded(d.aiGraded ?? false);
+    draftAutosave.consumeDraft();
+  }
+
   function handleTaskTypeSwitch(type: "task1" | "task2") {
     setTaskType(type);
     setSubType("");
@@ -105,7 +148,7 @@ export default function NewWritingEntryPage() {
     e.currentTarget.classList.remove("bg-[var(--color-accent)]/5", "border-[var(--color-accent)]");
     const file = e.dataTransfer.files?.[0];
     if (file && file.type.startsWith("image/")) {
-      handleImageSelect({ target: { files: e.dataTransfer.files } } as any);
+      handleImageSelect({ target: { files: e.dataTransfer.files } } as unknown as React.ChangeEvent<HTMLInputElement>);
     } else {
       setUploadError("Please drop an image file");
     }
@@ -165,6 +208,7 @@ export default function NewWritingEntryPage() {
         feedback,
         teacher_feedback: teacherFeedback ?? undefined,
       });
+      draftAutosave.clearDraft();
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Failed to save");
@@ -185,12 +229,19 @@ export default function NewWritingEntryPage() {
         >
           <ChevronLeft className="w-4 h-4" /> Back
         </button>
-        <h1 className="heading-lg">Log Writing Entry</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="heading-lg">Log Writing Entry</h1>
+          <DraftSavedIndicator status={draftAutosave.status} savedAt={draftAutosave.savedAt} />
+        </div>
         <p className="text-[var(--color-ink-secondary)] mt-1">
           Step {step} of 2 &mdash;{" "}
           {step === 1 ? "Task Details" : "Essay & Assessment"}
         </p>
       </div>
+
+      {draftAutosave.showRestore && (
+        <DraftRestoreBanner savedAt={draftAutosave.savedAt} onRestore={restoreDraft} onDismiss={draftAutosave.clearDraft} />
+      )}
 
       {/* Progress bar */}
       <div className="flex gap-2">

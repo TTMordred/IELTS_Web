@@ -9,6 +9,8 @@ import { createClient } from "@/lib/supabase/client";
 import type { VocabCard } from "@/lib/types";
 import { Plus, Trash2, Search, X } from "lucide-react";
 import { InlineEditField } from "@/components/ui/inline-edit-field";
+import { useDraftAutosave } from "@/hooks/use-draft-autosave";
+import { DraftRestoreBanner, DraftSavedIndicator } from "@/components/ui/draft-status";
 
 export function VocabList({ initialCards }: { initialCards: VocabCard[] }) {
   const [cards, setCards] = useState(initialCards);
@@ -21,6 +23,35 @@ export function VocabList({ initialCards }: { initialCards: VocabCard[] }) {
   const [meaning, setMeaning] = useState("");
   const [example, setExample] = useState("");
   const [topic, setTopic] = useState("");
+
+  // Google-Forms-style draft autosave for the Add Word form
+  const draftAutosave = useDraftAutosave({
+    key: "vocab-board:add",
+    value: { word, meaning, example, topic },
+    enabled: showForm,
+  });
+
+  function restoreDraft() {
+    const d = draftAutosave.draft;
+    if (!d) return;
+    setWord(d.word ?? "");
+    setMeaning(d.meaning ?? "");
+    setExample(d.example ?? "");
+    setTopic(d.topic ?? "");
+    setShowForm(true);
+    draftAutosave.consumeDraft();
+  }
+
+  function toggleAddForm() {
+    if (showForm) {
+      draftAutosave.clearDraft();
+      setWord("");
+      setMeaning("");
+      setExample("");
+      setTopic("");
+    }
+    setShowForm(!showForm);
+  }
 
   // DB topic suggestions
   const [topicSuggestions, setTopicSuggestions] = useState<string[]>([]);
@@ -56,6 +87,7 @@ export function VocabList({ initialCards }: { initialCards: VocabCard[] }) {
         tags: [],
         source: "",
       });
+      draftAutosave.clearDraft();
       // Reset form
       setWord("");
       setMeaning("");
@@ -112,16 +144,27 @@ export function VocabList({ initialCards }: { initialCards: VocabCard[] }) {
         </div>
         <Button
           variant={showForm ? "secondary" : "primary"}
-          onClick={() => setShowForm(!showForm)}
+          onClick={toggleAddForm}
         >
           {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           {showForm ? "Cancel" : "Add Word"}
         </Button>
       </div>
 
+      {draftAutosave.showRestore && (
+        <DraftRestoreBanner
+          savedAt={draftAutosave.savedAt}
+          onRestore={restoreDraft}
+          onDismiss={draftAutosave.clearDraft}
+        />
+      )}
+
       {/* Add Form */}
       {showForm && (
         <div className="card-base p-5 space-y-3 animate-fade-in-up">
+          <div className="flex justify-end">
+            <DraftSavedIndicator status={draftAutosave.status} savedAt={draftAutosave.savedAt} />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <Input
               label="Word / Phrase"

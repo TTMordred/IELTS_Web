@@ -14,7 +14,11 @@ import { getRelatedRecords } from "@/app/(app)/record-links-actions";
 import { RelatedRecords } from "@/components/record-links/related-records";
 import { AiGradeSpeaking } from "@/components/ai/ai-grade-speaking";
 import { Part1Notebook } from "@/components/speaking/part1-notebook";
+import { Part2Notebook } from "@/components/speaking/part2-notebook";
+import { Part3Notebook } from "@/components/speaking/part3-notebook";
 import { getSpeakingNotebook, getSpeakingTopicBank } from "../notebook-actions";
+import { getSpeakingPart2Cards } from "../part2-actions";
+import { getSpeakingPart3Questions } from "../part3-actions";
 import { speakingRecordLabel } from "@/lib/speaking/record-name";
 
 const MODULE_COLOR = "#1D9E75";
@@ -50,15 +54,15 @@ export default async function SpeakingDetailPage({
   const { entry, parts, recordingSignedUrl } = data;
   if (!entry) notFound();
 
-  const [relatedLinks, part1Notebook, part2Notebook, part3Notebook, part1Topics, part2Topics] = await Promise.all([
+  const [relatedLinks, part1Notebook, part2Cards, part3Questions, part1Topics, part2Topics] = await Promise.all([
     getRelatedRecords("speaking_entries", entry.id),
     getSpeakingNotebook(entry.id, 1),
-    getSpeakingNotebook(entry.id, 2),
-    getSpeakingNotebook(entry.id, 3),
+    getSpeakingPart2Cards(entry.id),
+    getSpeakingPart3Questions(entry.id),
     getSpeakingTopicBank(1),
     getSpeakingTopicBank(2),
   ]);
-  const selectedPart2TopicIds = new Set(part2Notebook.map((question) => question.topic_id));
+  const selectedPart2TopicIds = new Set(part2Cards.map((card) => card.topic_id).filter((id): id is string => Boolean(id)));
   const part3Topics = part2Topics.filter((topic) => selectedPart2TopicIds.has(topic.id));
 
   const criteriaScores = [
@@ -227,16 +231,14 @@ export default async function SpeakingDetailPage({
         initialQuestions={part1Notebook}
         topics={part1Topics}
       />
-      <Part1Notebook
-        part={2}
+      <Part2Notebook
         entryId={entry.id}
-        initialQuestions={part2Notebook}
+        initialCards={part2Cards}
         topics={part2Topics}
       />
-      <Part1Notebook
-        part={3}
+      <Part3Notebook
         entryId={entry.id}
-        initialQuestions={part3Notebook}
+        initialQuestions={part3Questions}
         topics={part3Topics}
       />
 

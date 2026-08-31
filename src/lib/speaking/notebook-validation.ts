@@ -2,20 +2,49 @@ import { z } from "zod";
 import { answerStructureFor, type AnswerFunction } from "../constants/speaking-answer-templates.ts";
 
 const requiredText = z.string().trim().min(1, "This field is required");
+const optionalVi = z.string().trim().optional();
 
 export const wordMeaningSchema = z.object({
   word: requiredText,
   meaning: requiredText,
+  meaningVi: optionalVi,
 });
 
 export const phraseMeaningSchema = z.object({
   phrase: requiredText,
   meaning: requiredText,
+  meaningVi: optionalVi,
 });
 
 export const linkingWordSchema = z.object({
   word: requiredText,
   function: requiredText,
+  meaningVi: optionalVi,
+});
+
+export const synonymSchema = z.object({
+  vocabulary: requiredText,
+  replacement: requiredText,
+  meaningVi: optionalVi,
+});
+
+export const referencingSchema = z.object({
+  phrase: requiredText,
+  replacement: requiredText,
+  meaningVi: optionalVi,
+});
+
+export const sentencePatternSchema = z.object({
+  sentence: requiredText,
+  meaning: requiredText,
+  example: requiredText,
+  meaningVi: optionalVi,
+});
+
+export const grammarFocusSchema = z.object({
+  grammar: requiredText,
+  example: requiredText,
+  meaningVi: optionalVi,
 });
 
 export const entryQuestionInputSchema = z.object({
@@ -39,10 +68,10 @@ export const answerInputSchema = z.object({
   idioms_phrasal_verbs: z.array(phraseMeaningSchema).min(1),
   collocations: z.array(phraseMeaningSchema).min(1),
   linking_words: z.array(linkingWordSchema).min(1),
-  synonyms_paraphrasing: requiredText,
-  referencing_devices: requiredText,
-  sentence_patterns: requiredText,
-  grammar_focus: requiredText,
+  synonyms_paraphrasing: z.array(synonymSchema).min(1),
+  referencing_devices: z.array(referencingSchema).min(1),
+  sentence_patterns: z.array(sentencePatternSchema).min(1),
+  grammar_focus: z.array(grammarFocusSchema).min(1),
 });
 
 export const newRecordNotebookQuestionSchema = z.object({

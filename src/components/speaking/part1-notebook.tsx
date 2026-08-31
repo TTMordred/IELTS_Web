@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpen, ChevronDown, ChevronRight, Edit3, Loader2, Plus, Trash2 } from "lucide-react";
 import {
@@ -16,6 +16,7 @@ import {
 import type { SpeakingAnswer, SpeakingEntryQuestion } from "@/lib/types";
 import type { AnswerInput, NewRecordNotebookQuestion } from "@/lib/speaking/notebook-validation";
 import { SpeakingAnswerEditor } from "./speaking-answer-editor";
+import { LanguageBankDisplay, answerLanguageBank } from "./language-bank-display";
 
 export type TopicBankItem = {
   id: string;
@@ -23,6 +24,7 @@ export type TopicBankItem = {
   sample_questions: string[] | null;
   is_forecast?: boolean;
   forecast_quarter?: string | null;
+  category?: string | null;
 };
 type NotebookQuestion = SpeakingEntryQuestion & { answers: SpeakingAnswer[] };
 type EditorState = { questionId: string; answer?: SpeakingAnswer; position: number } | null;
@@ -31,12 +33,15 @@ export function Part1Notebook({
   part,
   entryId,
   initialQuestions = [],
+  initialDraft = [],
   topics,
   onDraftChange,
 }: {
   part: 1 | 2 | 3;
   entryId?: string;
   initialQuestions?: NotebookQuestion[];
+  /** Restored saved-draft questions for the new-record flow; seeds the internal draft once. */
+  initialDraft?: NewRecordNotebookQuestion[];
   topics: TopicBankItem[];
   onDraftChange?: (questions: NewRecordNotebookQuestion[]) => void;
 }) {
@@ -50,6 +55,34 @@ export function Part1Notebook({
   const [draftQuestions, setDraftQuestions] = useState<NotebookQuestion[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+  // When restoring a saved draft in the new-record flow, seed the internal
+  // draft exactly once (guarded so later draft edits flowing back up through
+  // onDraftChange never reset the local list).
+  const appliedDraftRef = useRef(false);
+  useEffect(() => {
+    if (!onDraftChange || initialDraft.length === 0 || appliedDraftRef.current) return;
+    appliedDraftRef.current = true;
+    const now = new Date().toISOString();
+    setDraftQuestions(initialDraft.map((question, qi) => ({
+      id: `draft-${question.topicId}-${qi}`,
+      entry_id: "draft",
+      part,
+      topic_id: question.topicId,
+      topic_name: topics.find((topic) => topic.id === question.topicId)?.name,
+      question_text: question.questionText,
+      answer_function: question.answerFunction,
+      answers: question.answers.map((answer, ai) => ({
+        ...answer,
+        id: `draft-answer-${question.topicId}-${qi}-${ai}`,
+        entry_question_id: "draft",
+        created_at: now,
+        updated_at: now,
+      })),
+      created_at: now,
+      updated_at: now,
+    })));
+  }, [onDraftChange, initialDraft, part, topics]);
 
   const selectedTopic = topics.find((topic) => topic.id === topicId) ?? topics[0];
   const selectedTopicId = selectedTopic?.id ?? "";
@@ -317,11 +350,20 @@ export function Part1Notebook({
                         </div>
                         <div className="mt-3 space-y-2">
                           {question.answers.map((answer) => (
-                            <div key={answer.id} className="flex items-start gap-3 rounded-lg border border-[var(--color-line)] p-3">
-                              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--color-accent-light)] text-xs font-bold text-[var(--color-accent)]">{answer.position}</span>
-                              <p className="line-clamp-2 flex-1 text-sm text-[var(--color-ink-secondary)]">{answer.answer_text}</p>
-                              <button type="button" onClick={() => setEditor({ questionId: question.id, answer, position: answer.position })} aria-label={`Edit answer ${answer.position}`} className="text-[var(--color-ink-muted)] hover:text-[var(--color-accent)]"><Edit3 className="h-4 w-4" /></button>
-                              <button type="button" onClick={() => removeAnswer(answer.id)} aria-label={`Delete answer ${answer.position}`} className="text-[var(--color-ink-muted)] hover:text-[var(--color-critical)]"><Trash2 className="h-4 w-4" /></button>
+                            <div key={answer.id} className="rounded-lg border border-[var(--color-line)] p-3">
+                              <div className="flex items-start gap-3">
+                                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--color-accent-light)] text-xs font-bold text-[var(--color-accent)]">{answer.position}</span>
+                                <p className="flex-1 whitespace-pre-wrap text-sm text-[var(--color-ink-secondary)]">{answer.answer_text}</p>
+                                <button type="button" onClick={() => setEditor({ questionId: question.id, answer, position: answer.position })} aria-label={`Edit answer ${answer.position}`} className="text-[var(--color-ink-muted)] hover:text-[var(--color-accent)]"><Edit3 className="h-4 w-4" /></button>
+                                <button type="button" onClick={() => removeAnswer(answer.id)} aria-label={`Delete answer ${answer.position}`} className="text-[var(--color-ink-muted)] hover:text-[var(--color-critical)]"><Trash2 className="h-4 w-4" /></button>
+                              </div>
+                              {answer.follow_up_ideas ? (
+                                <div className="mt-3 rounded-lg bg-[var(--color-surface)] px-3 py-2 text-sm">
+                                  <p className="section-label text-[var(--color-accent)]">Follow-up / Expansion Ideas</p>
+                                  <p className="mt-2 whitespace-pre-wrap text-[var(--color-ink-secondary)]">{answer.follow_up_ideas}</p>
+                                </div>
+                              ) : null}
+                              <LanguageBankDisplay bank={answerLanguageBank(answer)} className="mt-3" />
                             </div>
                           ))}
                         </div>

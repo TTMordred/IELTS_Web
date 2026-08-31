@@ -10,6 +10,8 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { RichTextDisplay } from "@/components/ui/rich-text-display";
 import type { GrammarNote } from "@/lib/types";
 import { Plus, Trash2, ChevronDown, ChevronRight, X } from "lucide-react";
+import { useDraftAutosave } from "@/hooks/use-draft-autosave";
+import { DraftRestoreBanner, DraftSavedIndicator } from "@/components/ui/draft-status";
 
 export function GrammarBoard({ initialNotes }: { initialNotes: GrammarNote[] }) {
   const [notes, setNotes] = useState(initialNotes);
@@ -22,6 +24,29 @@ export function GrammarBoard({ initialNotes }: { initialNotes: GrammarNote[] }) 
   const [examples, setExamples] = useState(["", "", ""]);
   const [mistakes, setMistakes] = useState(["", ""]);
   const [source, setSource] = useState("");
+
+  // Google-Forms-style draft autosave for the Add Grammar Note form
+  const draftAutosave = useDraftAutosave({
+    key: "grammar-board:add",
+    value: { category: showForm, rule, examples, mistakes, source },
+    enabled: showForm !== null,
+  });
+
+  function restoreDraft() {
+    const d = draftAutosave.draft;
+    if (!d) return;
+    if (d.category) setShowForm(d.category);
+    setRule(d.rule ?? "");
+    setExamples(Array.isArray(d.examples) && d.examples.length ? d.examples : ["", "", ""]);
+    setMistakes(Array.isArray(d.mistakes) && d.mistakes.length ? d.mistakes : ["", ""]);
+    setSource(d.source ?? "");
+    draftAutosave.consumeDraft();
+  }
+
+  function closeForm() {
+    resetForm();
+    draftAutosave.clearDraft();
+  }
 
   function resetForm() {
     setRule("");
@@ -44,6 +69,7 @@ export function GrammarBoard({ initialNotes }: { initialNotes: GrammarNote[] }) 
         common_mistakes: mistakes.filter(Boolean),
         source: source.trim(),
       });
+      draftAutosave.clearDraft();
       setNotes((prev) => [
         {
           id: crypto.randomUUID(),
@@ -77,6 +103,14 @@ export function GrammarBoard({ initialNotes }: { initialNotes: GrammarNote[] }) 
 
   return (
     <div className="space-y-3">
+      {draftAutosave.showRestore && (
+        <DraftRestoreBanner
+          savedAt={draftAutosave.savedAt}
+          onRestore={restoreDraft}
+          onDismiss={draftAutosave.clearDraft}
+        />
+      )}
+
       {GRAMMAR_CATEGORIES.map((cat) => {
         const catNotes = notes.filter((n) => n.category === cat.id);
         const isExpanded = expandedCat === cat.id;
@@ -153,8 +187,11 @@ export function GrammarBoard({ initialNotes }: { initialNotes: GrammarNote[] }) 
                 {showForm === cat.id ? (
                   <div className="p-4 rounded-lg border border-[var(--color-line)] space-y-3 animate-fade-in-up">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-[var(--color-ink)]">Add Grammar Note</p>
-                      <button onClick={resetForm} className="p-1 rounded hover:bg-[var(--color-surface-hover)] cursor-pointer">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-[var(--color-ink)]">Add Grammar Note</p>
+                        <DraftSavedIndicator status={draftAutosave.status} savedAt={draftAutosave.savedAt} />
+                      </div>
+                      <button onClick={closeForm} className="p-1 rounded hover:bg-[var(--color-surface-hover)] cursor-pointer">
                         <X className="w-4 h-4 text-[var(--color-ink-muted)]" />
                       </button>
                     </div>

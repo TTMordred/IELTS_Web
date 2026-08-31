@@ -5,7 +5,11 @@ import { updateStreak } from "@/lib/streak";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { addEntryQuestion, saveSpeakingAnswer } from "./notebook-actions";
+import { createSpeakingPart2Cards } from "./part2-actions";
+import { createSpeakingPart3Questions } from "./part3-actions";
 import type { NewRecordNotebookQuestion } from "@/lib/speaking/notebook-validation";
+import type { Part2CardInput } from "@/lib/speaking/part2-validation";
+import type { Part3QuestionInput } from "@/lib/speaking/part3-validation";
 import { parseSpeakingRecordName } from "@/lib/speaking/record-name";
 
 export type PartDetailInput = {
@@ -27,6 +31,8 @@ export type CreateSpeakingEntryInput = {
   parts: PartDetailInput[];
   recording_url?: string | null;
   notebook?: NewRecordNotebookQuestion[];
+  part2Cards?: Part2CardInput[];
+  part3Questions?: Part3QuestionInput[];
 };
 
 function calcBand(scores: number[]): number {
@@ -93,6 +99,14 @@ export async function createSpeakingEntry(input: CreateSpeakingEntryInput) {
     for (const answer of question.answers) {
       await saveSpeakingAnswer({ ...answer, entryQuestionId: questionId });
     }
+  }
+
+  if (input.part2Cards && input.part2Cards.length > 0) {
+    await createSpeakingPart2Cards(entry.id, input.part2Cards);
+  }
+
+  if (input.part3Questions && input.part3Questions.length > 0) {
+    await createSpeakingPart3Questions(entry.id, input.part3Questions);
   }
 
   // Update daily activity

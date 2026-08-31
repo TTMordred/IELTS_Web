@@ -9,6 +9,8 @@ import { READING_QUESTION_TYPES, READING_TOPIC_CATEGORIES } from "@/lib/constant
 import { TEST_SOURCES } from "@/lib/constants/listening-types";
 import { scoreToBand } from "@/lib/constants/band-tables";
 import { createReadingRecord, type PassageInput } from "../actions";
+import { useDraftAutosave } from "@/hooks/use-draft-autosave";
+import { DraftRestoreBanner, DraftSavedIndicator } from "@/components/ui/draft-status";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const PASSAGES = [
@@ -50,6 +52,35 @@ export default function NewReadingRecordPage() {
   const clampedScore = Math.min(Math.max(totalScore, 0), 40);
   const estimatedBand = scoreToBand(clampedScore, "reading");
 
+  // Google-Forms-style draft autosave across all three steps
+  const draftValue = {
+    date,
+    source,
+    testName,
+    link,
+    totalScore: clampedScore,
+    totalTimeMin,
+    passages,
+    reflection,
+    selfRating,
+  };
+  const draftAutosave = useDraftAutosave({ key: "reading-entry:new", value: draftValue });
+
+  function restoreDraft() {
+    const d = draftAutosave.draft;
+    if (!d) return;
+    if (d.date) setDate(d.date);
+    if (d.source) setSource(d.source);
+    setTestName(d.testName ?? "");
+    setLink(d.link ?? "");
+    setTotalScore(d.totalScore ?? 0);
+    setTotalTimeMin(d.totalTimeMin ?? 60);
+    if (d.passages) setPassages(d.passages);
+    setReflection(d.reflection ?? "");
+    setSelfRating(d.selfRating ?? 3);
+    draftAutosave.consumeDraft();
+  }
+
   function setScoreSafe(val: number) {
     setTotalScore(Math.min(40, Math.max(0, val)));
   }
@@ -75,6 +106,7 @@ export default function NewReadingRecordPage() {
         self_rating: selfRating,
         passages,
       });
+      draftAutosave.clearDraft();
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Failed to save");
@@ -94,12 +126,19 @@ export default function NewReadingRecordPage() {
         >
           <ChevronLeft className="w-4 h-4" /> Back
         </button>
-        <h1 className="heading-lg">Log Reading Test</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="heading-lg">Log Reading Test</h1>
+          <DraftSavedIndicator status={draftAutosave.status} savedAt={draftAutosave.savedAt} />
+        </div>
         <p className="text-[var(--color-ink-secondary)] mt-1">
           Step {step} of 3 &mdash;{" "}
           {step === 1 ? "General Info" : step === 2 ? "Passage Details" : "Reflection"}
         </p>
       </div>
+
+      {draftAutosave.showRestore && (
+        <DraftRestoreBanner savedAt={draftAutosave.savedAt} onRestore={restoreDraft} onDismiss={draftAutosave.clearDraft} />
+      )}
 
       {/* Progress bar */}
       <div className="flex gap-2">

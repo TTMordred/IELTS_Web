@@ -8,6 +8,8 @@ import { Select } from "@/components/ui/select";
 import { LISTENING_SECTIONS, TEST_SOURCES } from "@/lib/constants/listening-types";
 import { scoreToBand } from "@/lib/constants/band-tables";
 import { createListeningRecord, type SectionInput } from "../actions";
+import { useDraftAutosave } from "@/hooks/use-draft-autosave";
+import { DraftRestoreBanner, DraftSavedIndicator } from "@/components/ui/draft-status";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type TestMode = "full" | "partial";
@@ -45,6 +47,37 @@ export default function NewListeningRecordPage() {
   const clampedScore = Math.min(totalScore, maxScore);
   const estimatedBand = testMode === "full" ? scoreToBand(clampedScore, "listening") : 0;
 
+  // Google-Forms-style draft autosave across all three steps
+  const draftValue = {
+    date,
+    source,
+    testName,
+    link,
+    testMode,
+    selectedSections,
+    totalScore: clampedScore,
+    sections,
+    reflection,
+    selfRating,
+  };
+  const draftAutosave = useDraftAutosave({ key: "listening-entry:new", value: draftValue });
+
+  function restoreDraft() {
+    const d = draftAutosave.draft;
+    if (!d) return;
+    if (d.date) setDate(d.date);
+    if (d.source) setSource(d.source);
+    setTestName(d.testName ?? "");
+    setLink(d.link ?? "");
+    if (d.testMode) setTestMode(d.testMode);
+    if (d.selectedSections) setSelectedSections(d.selectedSections);
+    setTotalScore(d.totalScore ?? 0);
+    if (d.sections) setSections(d.sections);
+    setReflection(d.reflection ?? "");
+    setSelfRating(d.selfRating ?? 3);
+    draftAutosave.consumeDraft();
+  }
+
   function setScoreSafe(val: number) {
     setTotalScore(Math.min(maxScore, Math.max(0, val)));
   }
@@ -80,6 +113,7 @@ export default function NewListeningRecordPage() {
         self_rating: selfRating,
         sections: submittedSections,
       });
+      draftAutosave.clearDraft();
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Failed to save");
@@ -99,12 +133,19 @@ export default function NewListeningRecordPage() {
         >
           <ChevronLeft className="w-4 h-4" /> Back
         </button>
-        <h1 className="heading-lg">Log Listening Test</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="heading-lg">Log Listening Test</h1>
+          <DraftSavedIndicator status={draftAutosave.status} savedAt={draftAutosave.savedAt} />
+        </div>
         <p className="text-[var(--color-ink-secondary)] mt-1">
           Step {step} of 3 &mdash;{" "}
           {step === 1 ? "General Info" : step === 2 ? "Section Details" : "Reflection"}
         </p>
       </div>
+
+      {draftAutosave.showRestore && (
+        <DraftRestoreBanner savedAt={draftAutosave.savedAt} onRestore={restoreDraft} onDismiss={draftAutosave.clearDraft} />
+      )}
 
       {/* Progress bar */}
       <div className="flex gap-2">
